@@ -4,11 +4,16 @@ let text_bubble = null;
 let saveButton, nahButton;
 let potatoKing;
 
+let gameState = "game";
+
+let mouseClicked_X;
+let mouseClicked_Y;
 function preload() {
   // worldFire = loadImage("assets/world_fire.png");
   // cytoplasmBG = loadImage("assets/cytoplasm.png");
   // kitchenBG = loadImage("assets/kitchen.png");
   // potatoImg = loadImage("assets/potato_king.png");
+  characterImg = loadImage("assets/textbox.png"); //placeholder
 }
 
 function setup() {
@@ -17,12 +22,40 @@ function setup() {
   saveButton = new Button(width/2 - 220, height/2 + 120, 250, 80, "SAVE THE WORLD");
   nahButton = new Button(width/2 + 20, height/2 + 120, 250, 80, "Nah");
   potatoKing = new Character(150, height - 130);
+
+  character = new Sprite(250, 250, 20);
+  character.color = "blue"
+  interact_hitbox = new Sprite();
+  interact_hitbox.width=20;
+  interact_hitbox.height=20;
+  
+  //character.image = characterImg;
 }
 
 function draw() {
-  if (scene === "start") drawStartScene();
-  if (scene === "intro") drawIntroScene();
-  if (scene === "kitchenExplain") drawKitchenScene();
+  background("yellow")
+  if (gameState == "cutscene") {
+    if (scene === "start") drawStartScene();
+    if (scene === "intro") drawIntroScene();
+    if (scene === "kitchenExplain") drawKitchenScene();
+    console.log(gameState)
+  } else if (gameState == "game") {
+    //player movement
+    character.display()
+    if (Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2)) <= 5) {
+      character.velocity.x = 0
+      character.velocity.y = 0
+    }
+
+    /*
+    if(keyIsPressed && key == "ArrowLeft") { character.velocity.x = -5 }
+    if(keyIsPressed && key == "ArrowRight") { character.velocity.x = 5 }
+    if(keyIsPressed && key == "ArrowDown") { character.velocity.y = 5 }
+    if(keyIsPressed && key == "ArrowUp") { character.velocity.x = -5 }
+    */
+
+  }
+  
 }
 
 //Start Page Scene
@@ -84,63 +117,73 @@ function drawKitchenScene() {
 //Click Handler
 
 function mouseClicked() {
+  mouseClicked_X = mouseX
+  mouseClicked_Y = mouseY
+  if (gameState=="cutscene") {
+    if (scene === "start") {
 
-  if (scene === "start") {
-
-    if (saveButton.isClicked()) {
-      scene = "intro";
-      text_bubble = new Dialogue([
-        "We don’t have much time for introductions.\nHi tRNA, my name is Potato King IV...",
-        "AND WE ARE DOOMED!",
-        "You are our last hope.\nYou must feed all these monsters before the timer runs out!",
-        "I have provided everything you need in my restaurant 'Potato's Cytoplasm'.",
-        "You will work in Ribosome 1.",
-        "I'll act as RNA Polymerase and break down vile creatures' orders (DNA genes)\ninto recipes (mRNA) at the nucleus front desk."
-      ]);
-    }
-
-    if (nahButton.isClicked()) {
-      text_bubble = new Dialogue([
-        "...",
-        "The world burns.",
-        "The monsters roar.",
-        "You monster.",
-        "Fine. Click SAVE THE WORLD."
-      ]);
-    }
-
-    // Click to advance dialogue
-    if (text_bubble && text_bubble.isClickedCenter()) {
-      text_bubble.next();
-      if (text_bubble.finished()) text_bubble = null;
-    }
-  }
-
-  else {
-
-    if (text_bubble && text_bubble.isClickedSide()) {
-      text_bubble.next();
-
-      if (text_bubble.finished()) {
-
-        if (scene === "intro") {
-          scene = "kitchenExplain";
+        if (saveButton.isClicked()) {
+          scene = "intro";
           text_bubble = new Dialogue([
-            "This will be your kitchen (Ribosome 1).",
-            "Your kitchen has different parts (rRNA): worktop, sink, oven, fridge...",
-            "You can collect ingredients from each station.",
-            "You have 3:00 minutes.",
-            "When the timer hits 0:00 (stop codon), the monster roars (release factor)...",
-            "Which means TIME'S UP 😨",
-            "Before starting any order (mRNA), you must place ONE giant plate (start codon).",
-            "Only ONE plate for ALL dishes.",
-            "Good luck, tRNA."
+            "We don’t have much time for introductions.\nHi tRNA, my name is Potato King IV...",
+            "AND WE ARE DOOMED!",
+            "You are our last hope.\nYou must feed all these monsters before the timer runs out!",
+            "I have provided everything you need in my restaurant 'Potato's Cytoplasm'.",
+            "You will work in Ribosome 1.",
+            "I'll act as RNA Polymerase and break down vile creatures' orders (DNA genes)\ninto recipes (mRNA) at the nucleus front desk."
           ]);
-        } else {
-          text_bubble = null;
+        }
+
+        if (nahButton.isClicked()) {
+          text_bubble = new Dialogue([
+            "...",
+            "The world burns.",
+            "The monsters roar.",
+            "You monster.",
+            "Fine. Click SAVE THE WORLD."
+          ]);
+        }
+
+        // Click to advance dialogue
+        if (text_bubble && text_bubble.isClickedCenter()) {
+          text_bubble.next();
+          if (text_bubble.finished()) text_bubble = null;
         }
       }
-    }
+
+      else {
+
+        if (text_bubble && text_bubble.isClickedSide()) {
+          text_bubble.next();
+
+          if (text_bubble.finished()) {
+
+            if (scene === "intro") {
+              scene = "kitchenExplain";
+              text_bubble = new Dialogue([
+                "This will be your kitchen (Ribosome 1).",
+                "Your kitchen has different parts (rRNA): worktop, sink, oven, fridge...",
+                "You can collect ingredients from each station.",
+                "You have 3:00 minutes.",
+                "When the timer hits 0:00 (stop codon), the monster roars (release factor)...",
+                "Which means TIME'S UP 😨",
+                "Before starting any order (mRNA), you must place ONE giant plate (start codon).",
+                "Only ONE plate for ALL dishes.",
+                "Good luck, tRNA."
+              ]);
+            } else {
+              text_bubble = null;
+            }
+          }
+        }
+      }
+  } else if (gameState == "game") {
+    dist = Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2))
+    character.velocity.x = ((mouseClicked_X-character.position.x)/dist)*5
+    character.velocity.y = ((mouseClicked_Y-character.position.y)/dist)*5
+    
+    
+    //moveTo(mouseX, mouseY, 5); but with more steps
   }
 }
 
