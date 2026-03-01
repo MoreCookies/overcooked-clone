@@ -4,10 +4,13 @@ let text_bubble = null;
 let saveButton, nahButton;
 let potatoKing;
 
-let gameState = "cutscene";
+let gameState = "game"; //change back to cutscene later
 
 let mouseClicked_X;
 let mouseClicked_Y;
+
+let obstacles = [];
+
 function preload() {
   // worldFire = loadImage("assets/world_fire.png");
   // cytoplasmBG = loadImage("assets/cytoplasm.png");
@@ -29,21 +32,30 @@ function setup() {
   interact_hitbox.width=20;
   interact_hitbox.height=20;
   
+  //create obstacles
+  obstacle = new Obstacle(400, 400, 80, 80, "CHOP")
+  obstacles.push(obstacle)
+
   //character.image = characterImg;
 }
 
 function draw() {
-  background("yellow")
+  background("beige")
   if (gameState == "cutscene") {
     if (scene === "start") drawStartScene();
     if (scene === "intro") drawIntroScene();
     if (scene === "kitchenExplain") drawKitchenScene();
   } else if (gameState == "game") {
-    //player movement
+    //player handling
     character.display()
     if (Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2)) <= 5) {
       character.velocity.x = 0
       character.velocity.y = 0
+    }
+
+    //obstacles
+    for(var i = 0; i<obstacles.length;i++) {
+      obstacles[i].display()
     }
 
   }
@@ -115,7 +127,6 @@ function mouseClicked() {
     // Click to advance dialogue
     if (text_bubble && (text_bubble.isClickedCenter || text_bubble.isClickedSide)) {
       text_bubble.next();
-      console.log("next!")
     }
     if (scene === "start") {
       if (saveButton.isClicked()) {
@@ -158,7 +169,8 @@ function mouseClicked() {
     } else if (text_bubble.finished() && scene == "kitchenExplain") {
       gameState = "game"
     }
-  } else if (gameState == "game") {
+  } else if (gameState == "game" && mouseClicked_X < windowWidth  && mouseClicked_Y < windowHeight) {
+    
     dist = Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2))
     character.velocity.x = ((mouseClicked_X-character.position.x)/dist)*5
     character.velocity.y = ((mouseClicked_Y-character.position.y)/dist)*5
