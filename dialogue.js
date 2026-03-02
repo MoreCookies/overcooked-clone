@@ -90,13 +90,17 @@ function mouseClicked() {
     if (saveButton.isClicked()) {
       scene = "intro";
       text_bubble = new Dialogue([
+        ".....", 
         "We don’t have much time for introductions.\nHi tRNA, my name is Potato King IV...",
         "AND WE ARE DOOMED!",
         "You are our last hope.\nYou must feed all these monsters before the timer runs out!",
         "I have provided everything you need in my restaurant 'Potato's Cytoplasm'.",
         "You will work in Ribosome 1.",
-        "I'll act as RNA Polymerase and break down vile creatures' orders (DNA genes)\ninto recipes (mRNA) at the nucleus front desk."
-      ]);
+        "I'll act as RNA Polymerase and break down vile creatures' orders (DNA genes)\ninto recipes (mRNA) at the nucleus front desk.",
+        "They speak a weird form of English and\n,while most parts are the same,\n some words are different (T → U); I will translate them for you.",
+       "The monsters get a bit feisty so I have added some extra paper (poly-A tail) at the end of the receipt \nthat may get torn up so don’t freight your order should last.",
+      "Each of the recipes I send in will have a red top (methyl cap) to inform you they are complete recipes."  
+     ]);
     }
 
     if (nahButton.isClicked()) {
