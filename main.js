@@ -8,8 +8,10 @@ let gameState = "game"; //change back to cutscene later
 
 let mouseClicked_X;
 let mouseClicked_Y;
+let direction = Math.PI/2;
 
 let obstacles = [];
+let in_focus = [];
 
 function preload() {
   // worldFire = loadImage("assets/world_fire.png");
@@ -20,23 +22,33 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(900, 600);
-
+  new Canvas(900, 600);
+  
   saveButton = new Button(width/2 - 220, height/2 + 120, 250, 80, "SAVE THE WORLD");
   nahButton = new Button(width/2 + 20, height/2 + 120, 250, 80, "Nah");
   potatoKing = new Character(150, height - 130);
 
   character = new Sprite(250, 250, 20);
-  character.color = "blue"
-  interact_hitbox = new Sprite();
-  interact_hitbox.width=20;
-  interact_hitbox.height=20;
+  character.color = "pink"
+  character.visible = true;
+  character.physics = DYN;
+  interact_hitbox = new Sprite(250, 250, 35);
+  interact_hitbox.debug = true
+  interact_hitbox.physics = DYN;
+
+  character.overlaps(interact_hitbox)
   
   //create obstacles
-  obstacle = new Obstacle(400, 400, 80, 80, "CHOP")
-  obstacles.push(obstacle)
+  obstacle1 = new Obstacle(465, 400, 60, 40, "CHOP")
+  obstacle2 = new Obstacle(400, 400, 60, 40, "SPAWN")
+  obstacles.push(obstacle1)
+  obstacles.push(obstacle2)
 
-  //character.image = characterImg;
+  for(var i = 0; i<obstacles.length;i++) {
+    obstacles.visible = true
+    interact_hitbox.overlaps(obstacles[i].obstacle_sprite)
+    character.collides(obstacles[i].obstacle_sprite)
+  }
 }
 
 function draw() {
@@ -46,18 +58,60 @@ function draw() {
     if (scene === "intro") drawIntroScene();
     if (scene === "kitchenExplain") drawKitchenScene();
   } else if (gameState == "game") {
-    //player handling
-    character.display()
-    if (Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2)) <= 5) {
+    //Reset character velocity if it moves undirected by mouse, or reaches mouse position
+    if (Math.abs(5-Math.sqrt(Math.pow(character.velocity.x,2) + Math.pow(character.velocity.y, 2))) > 0.1 ||
+      Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2)) <= 5) {
       character.velocity.x = 0
       character.velocity.y = 0
     }
-
+    //Interact hitbox
+    displaced = p5.Vector.add(character.position, createVector(30*Math.cos(direction),30*Math.sin(direction)))
+    interact_hitbox.position = createVector(displaced.x, displaced.y)
+    
     //obstacles
     for(var i = 0; i<obstacles.length;i++) {
+      //Handle if there are multiple obstacles in focus
       obstacles[i].display()
-    }
+      if (character.collides(obstacles[i].obstacle_sprite)) { 
+        console.log("collided")
+        character.velocity = createVector(0,0) 
+        //obstacle that it collided with is the one in focus.
+        obstacles[i].focus = true
+      } else if(interact_hitbox.overlaps(obstacles[i].obstacle_sprite)) { obstacles[i].focus = true; }
+      
+      if(!in_focus.includes(i) && obstacles[i].focus) { in_focus.push(i) }
 
+      if(in_focus.length > 1) {
+        closest=[0,10000]
+        for(var k = 0; k<in_focus.length;k++) {
+          distance = obstacles[in_focus[k]].obstacle_sprite.position.dist(interact_hitbox.position)
+          if(distance < closest[1]) {
+            closest[0] = k
+            closest[1] = distance
+          } else {
+            obstacles[in_focus[k]].focus = false
+          }
+        }
+        in_focus=[closest[0]]
+      }
+
+      if(kb.presses("space")) {
+        //interaction behaviour
+        /*4 types of interaction
+        CHANGE --> chop, cook, boil... etc.
+        GET --> obtain new item, spawned
+        PLACE --> put down item (e.g. counters, will display item on top)
+        
+        TURN IN --> fulfill orders
+        */
+        for(var x = 0; x<in_focus.length; x++) {
+          //loop thru focused
+        }
+      }
+      if (interact_hitbox.overlaps(obstacles[i].obstacle_sprite)) {
+
+      }
+    }
   }
   
 }
@@ -169,14 +223,20 @@ function mouseClicked() {
     } else if (text_bubble.finished() && scene == "kitchenExplain") {
       gameState = "game"
     }
-  } else if (gameState == "game" && mouseClicked_X < windowWidth  && mouseClicked_Y < windowHeight) {
-    
+  } else if (gameState == "game" && mouseClicked_X < 900 && mouseClicked_Y < 600) {
+    for(var i = 0; i<obstacles.length;i++) {
+      obstacles[i].focus = false
+      in_focus = []
+    }
+
+    //Click to move
     dist = Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2))
     character.velocity.x = ((mouseClicked_X-character.position.x)/dist)*5
     character.velocity.y = ((mouseClicked_Y-character.position.y)/dist)*5
-    
-    
-    //moveTo(mouseX, mouseY, 5); but with more steps
+
+    //Interact_hitbox follows mouse click direction
+    direction = Math.atan(character.velocity.y/character.velocity.x)
+    if (character.velocity.x < 0) { direction = (Math.PI)+direction }
   }
 }
 
