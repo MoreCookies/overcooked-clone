@@ -6,6 +6,7 @@ class Obstacle {
     this.obstacle_sprite.color = "blue"
     this.focus = false
     this.progress = 0;
+    this.type = type
   }
 
   interact() {
@@ -13,6 +14,7 @@ class Obstacle {
     this.progress += 20;
     if (this.progress == 100) {
       //create new item on the obstacle
+      this.progress = 0
       return this.item_out //delete this later
     }
   }
@@ -22,8 +24,10 @@ class Obstacle {
 
     //show progress bar
     rectMode(CENTER)
-    stroke(0);
-    if (this.focus) {fill("pink") } else { noFill() }
+    strokeWeight(3);
+    if (this.focus) { this.obstacle_sprite.stroke = "black" } else { this.obstacle_sprite.stroke = "white" }
+    noFill()
+    stroke(0)
     rect(this.obstacle_sprite.position.x, this.obstacle_sprite.position.y-30, 30, 10)
     noStroke();
     fill("green")

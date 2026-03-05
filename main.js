@@ -13,6 +13,8 @@ let direction = Math.PI/2;
 let obstacles = [];
 let in_focus = [];
 
+let inventory = ""
+
 function preload() {
   // worldFire = loadImage("assets/world_fire.png");
   // cytoplasmBG = loadImage("assets/cytoplasm.png");
@@ -39,10 +41,13 @@ function setup() {
   character.overlaps(interact_hitbox)
   
   //create obstacles
-  obstacle1 = new Obstacle(465, 400, 60, 40, "CHOP")
-  obstacle2 = new Obstacle(400, 400, 60, 40, "SPAWN")
+  obstacle1 = new Obstacle(400, 400, 60, 40, "SPAWN")
+  obstacle2 = new Obstacle(465, 400, 60, 40, "CHOP")
+  obstacle3 = new Obstacle(530, 400, 60, 40, "RETURN")
+
   obstacles.push(obstacle1)
   obstacles.push(obstacle2)
+  obstacles.push(obstacle3)
 
   for(var i = 0; i<obstacles.length;i++) {
     obstacles.visible = true
@@ -64,38 +69,42 @@ function draw() {
       character.velocity.x = 0
       character.velocity.y = 0
     }
+
     //Interact hitbox
     displaced = p5.Vector.add(character.position, createVector(30*Math.cos(direction),30*Math.sin(direction)))
     interact_hitbox.position = createVector(displaced.x, displaced.y)
     
     //obstacles
     for(var i = 0; i<obstacles.length;i++) {
-      //Handle if there are multiple obstacles in focus
+      
+      //Check for collision & add to focus
       obstacles[i].display()
-      if (character.collides(obstacles[i].obstacle_sprite)) { 
-        console.log("collided")
-        character.velocity = createVector(0,0) 
-        //obstacle that it collided with is the one in focus.
-        obstacles[i].focus = true
-      } else if(interact_hitbox.overlaps(obstacles[i].obstacle_sprite)) { obstacles[i].focus = true; }
+      if (character.collides(obstacles[i].obstacle_sprite)) { character.velocity = createVector(0,0) }
+      if(interact_hitbox.overlapping(obstacles[i].obstacle_sprite)) { obstacles[i].focus = true; }
+      else { obstacles[i].focus = false }
       
       if(!in_focus.includes(i) && obstacles[i].focus) { in_focus.push(i) }
 
+      //Handle multiple focuses
       if(in_focus.length > 1) {
         closest=[0,10000]
         for(var k = 0; k<in_focus.length;k++) {
           distance = obstacles[in_focus[k]].obstacle_sprite.position.dist(interact_hitbox.position)
+          console.log(k + ": " + distance)
           if(distance < closest[1]) {
-            closest[0] = k
+            closest[0] = in_focus[k]
             closest[1] = distance
           } else {
             obstacles[in_focus[k]].focus = false
           }
+          console.log("Closest: " + closest[0])
         }
         in_focus=[closest[0]]
+        //console.log(in_focus)
+        //console.log("Closest: " + closest[0])
       }
-
-      if(kb.presses("space")) {
+    }
+    if(kb.presses("space")) {
         //interaction behaviour
         /*4 types of interaction
         CHANGE --> chop, cook, boil... etc.
@@ -104,13 +113,9 @@ function draw() {
         
         TURN IN --> fulfill orders
         */
-        for(var x = 0; x<in_focus.length; x++) {
-          //loop thru focused
-        }
-      }
-      if (interact_hitbox.overlaps(obstacles[i].obstacle_sprite)) {
-
-      }
+        workstation_type = obstacles[in_focus[0]].type
+        console.log(workstation_type)
+        obstacles[in_focus[0]].interact()
     }
   }
   
@@ -138,7 +143,6 @@ function drawStartScene() {
   if (text_bubble) text_bubble.updateCenter();
 }
 //Intro Scene
-
 function drawIntroScene() {
 
   // image(cytoplasmBG, 0, 0, width, height);
@@ -156,7 +160,6 @@ function drawIntroScene() {
 }
 
 //Kitchen Scene
-
 function drawKitchenScene() {
   // image(kitchenBG, 0, 0, width, height);
   background(110, 85, 50);
@@ -173,7 +176,6 @@ function drawKitchenScene() {
 }
 
 //Click Handler
-
 function mouseClicked() {
   mouseClicked_X = mouseX
   mouseClicked_Y = mouseY
