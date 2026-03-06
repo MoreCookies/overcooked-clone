@@ -13,7 +13,7 @@ let direction = Math.PI/2;
 let obstacles = [];
 let in_focus = [];
 
-let inventory = ""
+let inventory = null;
 
 function preload() {
   // worldFire = loadImage("assets/world_fire.png");
@@ -74,9 +74,13 @@ function draw() {
     displaced = p5.Vector.add(character.position, createVector(30*Math.cos(direction),30*Math.sin(direction)))
     interact_hitbox.position = createVector(displaced.x, displaced.y)
     
+    //Display item being held, would be an image but just ellipse as placeholder
+    fill("red")
+    ellipse(interact_hitbox.position.x, interact_hitbox.position.y, 20) //image would get imgref from 
+    noFill()
+
     //obstacles
     for(var i = 0; i<obstacles.length;i++) {
-      
       //Check for collision & add to focus
       obstacles[i].display()
       if (character.collides(obstacles[i].obstacle_sprite)) { character.velocity = createVector(0,0) }
@@ -90,32 +94,48 @@ function draw() {
         closest=[0,10000]
         for(var k = 0; k<in_focus.length;k++) {
           distance = obstacles[in_focus[k]].obstacle_sprite.position.dist(interact_hitbox.position)
-          console.log(k + ": " + distance)
           if(distance < closest[1]) {
             closest[0] = in_focus[k]
             closest[1] = distance
           } else {
             obstacles[in_focus[k]].focus = false
           }
-          console.log("Closest: " + closest[0])
         }
         in_focus=[closest[0]]
-        //console.log(in_focus)
-        //console.log("Closest: " + closest[0])
       }
+
+      obstacles[i].display_item()
     }
+
     if(kb.presses("space")) {
         //interaction behaviour
         /*4 types of interaction
         CHANGE --> chop, cook, boil... etc.
         GET --> obtain new item, spawned
         PLACE --> put down item (e.g. counters, will display item on top)
-        
         TURN IN --> fulfill orders
         */
         workstation_type = obstacles[in_focus[0]].type
         console.log(workstation_type)
-        obstacles[in_focus[0]].interact()
+        //cook if player hands are empty
+        if(inventory && obstacles[in_focus[0]].item == "") {
+          //place down item on the bench
+        } else if(!inventory && obstacles[in_focus[0]].item) {
+          //pick up item
+          inventory = obstacles[in_focus[0]].item
+          obstacles[in_focus[0]].item = ""
+        }
+
+        if(!inventory && ["CHOP","COOK","BOIL"].includes(workstation_type)) { 
+          obstacles[in_focus[0]].interact()
+          //update player inventory
+          inventory = obstacles[in_focus[0]].interact()
+        } else if(inventory && workstation_type == "RETURN") {
+          //turn in items
+        } else if(inventory && workstation_type == "GARBAGE") {
+          //delete item
+          inventory = ""
+        }
     }
   }
   
