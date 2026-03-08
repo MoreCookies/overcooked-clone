@@ -13,7 +13,15 @@ let direction = Math.PI/2;
 let obstacles = [];
 let in_focus = [];
 
-let inventory = null;
+let item_held = "tomato";
+
+//For next dish game logic
+let dish_recipes;
+let ingredients;
+let current_order;
+let remaining_dishes = 10-Math.floor(Math.random()*3)
+
+//let inventory = null;
 
 function preload() {
   // worldFire = loadImage("assets/world_fire.png");
@@ -32,13 +40,18 @@ function setup() {
 
   character = new Sprite(250, 250, 20);
   character.color = "pink"
-  character.visible = true;
   character.physics = DYN;
+
   interact_hitbox = new Sprite(250, 250, 35);
   interact_hitbox.debug = true
   interact_hitbox.physics = DYN;
 
+  item_held = new Sprite(250, 250, 20)
+  item_held.physics = STATIC;
+
   character.overlaps(interact_hitbox)
+  character.overlaps(item_held)
+  
   
   //create obstacles
   obstacle1 = new Obstacle(400, 400, 60, 40, "SPAWN")
@@ -48,12 +61,33 @@ function setup() {
   obstacles.push(obstacle1)
   obstacles.push(obstacle2)
   obstacles.push(obstacle3)
-
+  //Set to make invisible, temp rn
+  character.visible = true
+  character.layer = 2
   for(var i = 0; i<obstacles.length;i++) {
     obstacles.visible = true
     interact_hitbox.overlaps(obstacles[i].obstacle_sprite)
     character.collides(obstacles[i].obstacle_sprite)
+    obstacles[i].obstacle_sprite.layer = 1
   }
+
+
+  //Set up items
+  //Definitions of all items, any existing instances IN THE GAME are just the NAMES OF THE ITEMS
+  ingredients  = []
+
+  tomato = new Ingredient ("tomato", {"CHOP": "cut_tomato"})
+  cut_tomato = new Ingredient ("cut_tomato", {}) //Cut tomato is a final processig of the tomato
+  lettuce = new Ingredient ("lettuce", {"CHOP": "cut_lettuce"})
+  cut_lettuce = new Ingredient ("cut_lettuce", {}) //Cut tomato is a final processig of the tomato
+
+  ingredients.push(tomato)
+  ingredients.push(cut_tomato)
+  ingredients.push(lettuce)
+  ingredients.push(cut_lettuce)
+
+  //Recipes for assembly of foods
+  dish_recipes  = {"salad": ["cut_tomato", "cut_lettuce"]}
 }
 
 function draw() {
@@ -65,7 +99,8 @@ function draw() {
   } else if (gameState == "game") {
     //Reset character velocity if it moves undirected by mouse, or reaches mouse position
     if (Math.abs(5-Math.sqrt(Math.pow(character.velocity.x,2) + Math.pow(character.velocity.y, 2))) > 0.1 ||
-      Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2)) <= 5) {
+      Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2)) <= 5
+    ) {
       character.velocity.x = 0
       character.velocity.y = 0
     }
@@ -75,10 +110,10 @@ function draw() {
     interact_hitbox.position = createVector(displaced.x, displaced.y)
     
     //Display item being held, would be an image but just ellipse as placeholder
-    fill("red")
+    if(item_held == "tomato") { fill("red") }
+    else if(item_held == "lettuce") { fill("green") }
     ellipse(interact_hitbox.position.x, interact_hitbox.position.y, 20) //image would get imgref from 
     noFill()
-
     //obstacles
     for(var i = 0; i<obstacles.length;i++) {
       //Check for collision & add to focus
@@ -103,42 +138,38 @@ function draw() {
         }
         in_focus=[closest[0]]
       }
-
-      obstacles[i].display_item()
     }
 
-    if(kb.presses("space")) {
-        //interaction behaviour
-        /*4 types of interaction
-        CHANGE --> chop, cook, boil... etc.
-        GET --> obtain new item, spawned
-        PLACE --> put down item (e.g. counters, will display item on top)
-        TURN IN --> fulfill orders
-        */
-        workstation_type = obstacles[in_focus[0]].type
-        console.log(workstation_type)
-        //cook if player hands are empty
-        if(inventory && obstacles[in_focus[0]].item == "") {
-          //place down item on the bench
-        } else if(!inventory && obstacles[in_focus[0]].item) {
-          //pick up item
-          inventory = obstacles[in_focus[0]].item
-          obstacles[in_focus[0]].item = ""
+    //interaction behaviour
+    if(kb.presses("space") && in_focus.length > 0) {
+      workstation_type = obstacles[in_focus[0]].type
+      console.log(workstation_type)
+      if(!item_held) {
+        if(obstacles[in_focus[0]].item) {
+          //Pick up an item if it is a spawner, or there is an item to be picked up
+          item_held = obstacles[in_focus[0]].item
+          obstacles[in_focus[0]].item = null
+        } else if(["CHOP","COOK","BOIL"].includes(workstation_type) && obstacles[in_focus[0]].item) {
+          //Interact with a cooking workbench
+          obstacles[in_focus[0]].interact(ingredients)
         }
-
-        if(!inventory && ["CHOP","COOK","BOIL"].includes(workstation_type)) { 
-          obstacles[in_focus[0]].interact()
-          //update player inventory
-          inventory = obstacles[in_focus[0]].interact()
-        } else if(inventory && workstation_type == "RETURN") {
-          //turn in items
-        } else if(inventory && workstation_type == "GARBAGE") {
-          //delete item
-          inventory = ""
+      } else if(item_held) {
+        //Put item down
+        if(obstacles[in_focus[0]].item == null) {
+          obstacles[in_focus[0]].item = item_held
+          item_held = null
+        } else if(workstation_type == "RETURN" && item_held == current_order) {
+          //Return dish
+          item_held = null
+          remaining_dishes -= 1;
+          current_order = dish_recipes[Math.floor(Math.random()*dish_recipes.length)]
+        } else if (workstation_type == "GARBAGE") {
+          //Throw item away
+          item_held = null
         }
+      }
     }
   }
-  
 }
 
 //Start Page Scene
@@ -244,6 +275,14 @@ function mouseClicked() {
       ]);
     } else if (text_bubble.finished() && scene == "kitchenExplain") {
       gameState = "game"
+      //Show all sprites
+      character.visible = true
+      item_held.visible = true
+      for(var i = 0; i<obstacles.length;i++) {
+        obstacles.visible = true
+        interact_hitbox.overlaps(obstacles[i].obstacle_sprite)
+        character.collides(obstacles[i].obstacle_sprite)
+      }
     }
   } else if (gameState == "game" && mouseClicked_X < 900 && mouseClicked_Y < 600) {
     for(var i = 0; i<obstacles.length;i++) {
@@ -251,14 +290,14 @@ function mouseClicked() {
       in_focus = []
     }
 
+    //Interact_hitbox follows mouse click direction
+    direction = Math.atan((mouseClicked_Y-character.position.y)/(mouseClicked_X-character.position.x))
+    
+    if (mouseClicked_X-character.position.x < 0) { direction = (Math.PI)+direction }
+
     //Click to move
     dist = Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2))
-    character.velocity.x = ((mouseClicked_X-character.position.x)/dist)*5
-    character.velocity.y = ((mouseClicked_Y-character.position.y)/dist)*5
-
-    //Interact_hitbox follows mouse click direction
-    direction = Math.atan(character.velocity.y/character.velocity.x)
-    if (character.velocity.x < 0) { direction = (Math.PI)+direction }
+    character.velocity = createVector(Math.cos(direction) * 5, Math.sin(direction) * 5)
   }
 }
 

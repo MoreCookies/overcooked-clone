@@ -16,26 +16,32 @@ class Obstacle {
     this.item = item 
   }
 
-  interact() {
-    console.log("interacted")
-    if(["CHOP", "COOK", "BOIL"].includes(this.type)) {
+  interact(ingredients) {
+    console.log(this.type)
+    
+    //Check if the ingredient is mutable by this workstation
+    if(["CHOP", "COOK", "BOIL"].includes(this.type) && ingredients[this.item][(this.type)]) {
+      console.log("changing!")
       this.progress += 20;
       if (this.progress == 100) {
         //create new item on the obstacle
         this.progress = 0
         //this.item.change(this.type) //Change item into different type
       }
+    } else if(this.type == "NONE") { //THIS IS JUST A TABLE
+      this.item = null //the item has been picked up!
     }
   }
 
   display() {
+    strokeWeight(2);
+    if (this.focus) { this.obstacle_sprite.stroke = "black" } else { this.obstacle_sprite.stroke = "white" }
+    noStroke();
+
     // Cooking station
     if(["CHOP", "COOK", "BOIL"].includes(this.type)) {
       //Show progress bar
       rectMode(CENTER)
-      strokeWeight(2);
-      if (this.focus) { this.obstacle_sprite.stroke = "black" } else { this.obstacle_sprite.stroke = "white" }
-      noStroke();
       fill("green")
       rect(this.obstacle_sprite.position.x, this.obstacle_sprite.position.y-30, this.progress*(0.3), 10)
       noFill()
@@ -44,15 +50,10 @@ class Obstacle {
       noStroke();
     }
     //Display item
-    
-  }
-
-  display_item() {
     if(this.item) {
-      image(this.item.imgref, 
-        this.obstacle_sprite.position.x, 
-        this.obstacle_sprite.position.y) 
-        //once we have an img for the items, make sure it is the right resolution
+      if(this.item.imgref) { image(this.item.imgref, this.obstacle_sprite.position.x, this.obstacle_sprite.position.y) }
+      else { text("🍅", this.obstacle_sprite.position.x, this.obstacle_sprite.position.y)} //temp
+      //once we have an img for the items, make sure it is the right resolution
     }
   }
 }
@@ -60,6 +61,6 @@ class Obstacle {
 /*
 rest of gameplay
 - timer --> connect to gamestate
-- orders --> create some display and maybe animations if u r feeling fancy
+- orders --> create some display and maybe animations if u r feeling fancy (we r not fancy rn)
 - combining objects
 */
