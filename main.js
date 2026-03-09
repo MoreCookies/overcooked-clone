@@ -29,9 +29,8 @@ function preload() {
   // kitchenBG = loadImage("assets/kitchen.png");
   potatoImg = loadImage("assets/potatoking.png");
   titlepage = loadImage("assets/titlepage.png");
-  characterImg1 = loadImage("assets/character1_right.png")
-  characterImg2 = loadImage("assets/character1_left.png")
-
+  characterImg1 = loadImage("assets/character_right1.png")
+  characterImg2 = loadImage("assets/character_right2.png")
 
   //Load items
   tomatoImg = loadImage("assets/tomato.png")
@@ -57,7 +56,11 @@ function setup() {
   returnTableImg.resize(50, 0)
   garbageImg.resize(50, 0)
   salad1Img.resize(30, 0)
+  salad2Img.resize(30, 0)
   cut_onionsImg.resize(30, 0)
+
+  characterImg1.resize(40, 0)
+  characterImg2.resize(40, 0)
 
   new Canvas(900, 600);
   saveButton = new Button(width/2 - 220, height/2 + 120, 250, 80, "SAVE THE WORLD");
@@ -71,11 +74,21 @@ function setup() {
   character.frameIndex = 0;
 
   character.image = character.frames[0];
-  character.scale = 0.1;
-
+  
   interact_hitbox = new Sprite(250,250,35);
   interact_hitbox.debug = true;
   interact_hitbox.physics = DYN;
+  angleMode(DEGREES)
+
+  character.draw = () => {
+    push() 
+    rotate(-character.rotation)
+    if(direction > Math.PI/2) { scale(-1, 1) }
+    image(character.image, 0, 0)
+    pop()
+    pop() //pops the draw translations
+    if(item_held) { image(ingredients[item_held].imgref, interact_hitbox.position.x, interact_hitbox.position.y) }
+  }
 
   ingredients = {};
 
@@ -83,25 +96,8 @@ function setup() {
   lettuce = new Ingredient("lettuce", {"CHOP":"cut_lettuce"}, lettuceImg);
   onion = new Ingredient("onion", {"CHOP":"cut_onion"}, onionImg);
   cut_onion = new Ingredient("cut_onion", {}, cut_onionsImg);
-}
-
-
-function draw() {
-
-  background(200);
-  let frame = floor(frameCount / 10) % character.frames.length;
-  character.image = character.frames[frame];
-
-  character.overlaps(interact_hitbox);
-
-  drawSprites();
-
-
-  //item_held = new Sprite(250, 250, 20)
-  //item_held.physics = STATIC;
 
   character.overlaps(interact_hitbox)
-  //character.overlaps(item_held)
 
   //Set up items
   //Definitions of all items, any existing instances IN THE GAME are just the NAMES OF THE ITEMS
@@ -178,9 +174,14 @@ function draw() {
     if (scene === "kitchenExplain") drawKitchenScene();
   } else if (gameState == "game") {
     character.rotation = 0;
+    frame = floor(frameCount / 10) % character.frames.length;
+    if (character.velocity.x != 0 || character.velocity.y != 0) {character.image = character.frames[frame]; }
+
+    //Display orders
     textSize(20)
-    text(current_order, 50, 50)
-    text(dish_recipes[current_order], 50, 100)
+    text("Current amino acid: " + current_order, 50, 50)
+    text("Codon: " + dish_recipes[current_order], 50, 100)
+    text("Codons remaining: " + remaining_dishes, 50, 150)
 
     //Reset character velocity if it moves undirected by mouse, or reaches mouse position
     if (Math.abs(5-Math.sqrt(Math.pow(character.velocity.x,2) + Math.pow(character.velocity.y, 2))) > 0.1 ||
@@ -195,12 +196,7 @@ function draw() {
     interact_hitbox.position = createVector(displaced.x, displaced.y)
     
     //Display item being held, would be an image but just ellipse as placeholder
-    if(item_held) { image(ingredients[item_held].imgref, interact_hitbox.position.x, interact_hitbox.position.y) }
-    // if(item_held == "tomato") { fill("red") }
-    // else if(item_held == "lettuce") { fill("green") }
-    // ellipse(interact_hitbox.position.x, interact_hitbox.position.y, 20) //image would get imgref from 
-    // noFill()
-
+    
     //obstacles
     for(var i = 0; i<obstacles.length;i++) {
       //Check for collision & add to focus
@@ -258,6 +254,7 @@ function draw() {
           //Return dish
           item_held = null
           current_order = Object.keys(dish_recipes)[Math.floor(Math.random()*Object.keys(dish_recipes).length)]
+          
           remaining_dishes -= 1;
           console.log("item returned!")
         } else if (workstation_type == "GARBAGE") {
