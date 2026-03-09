@@ -375,7 +375,7 @@ function mouseClicked() {
             "This will be your kitchen, Ribosome 1. \nYour kitchen has different parts (rRNA):  your worktop, sink, oven, fridge, all the tools you need to prep the dishes.", 
             "You, tRNA, are the chief. \nYou’ll pick up ingredients and carry them across from station to station. Every order has 3 ingredients (the codons)  that make up the dish (1 amino acid).",
             "When you hand a dish to the counter (P site), you swap your appearance;\n you’re a new tRNA ready for the dish! The A site is where you accept the next dish recipe (mRNA).",
-            "You’ll have a single giant plate for the whole order. That’s your start codon… place it first before cooking. \nThen follow the mRNA ticket exactly: ingredient by ingredient.",
+            "Your first dish is the start codon.\nThen follow the mRNA ticket exactly: ingredient by ingredient.",
             "When you finish the last dish (stop codon), the monster will roar (release factor). \nIf it roars happily, you win! If it roars angrily, you lose. Now get to it!",
             "Now get to it! \nYour monsters are hungry and Potato King IV is counting on you!"
           ]);
