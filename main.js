@@ -29,9 +29,7 @@ function preload() {
   // kitchenBG = loadImage("assets/kitchen.png");
   potatoImg = loadImage("assets/potatoking.png");
   titlepage = loadImage("assets/titlepage.png");
-  characterImg1 = loadImage("assets/character1_right.png")
-  characterImg2 = loadImage("assets/character1_left.png")
-
+  characterImg = loadImage("assets/character1_right.png")
 
   //Load items
   tomatoImg = loadImage("assets/tomato.png")
@@ -64,38 +62,15 @@ function setup() {
   nahButton = new Button(width/2 + 20, height/2 + 120, 250, 80, "Nah");
   potatoKing = new Character(150, height - 130);
 
-  character = new Sprite(250,250,40);
+  character = new Sprite(250, 250, 40);
+  character.color = "pink"
   character.physics = DYN;
+  character.image = characterImg
+  character.image.scale = 0.1
 
-  character.frames = [characterImg1, characterImg2];
-  character.frameIndex = 0;
-
-  character.image = character.frames[0];
-  character.scale = 0.1;
-
-  interact_hitbox = new Sprite(250,250,35);
-  interact_hitbox.debug = true;
+  interact_hitbox = new Sprite(250, 250, 35);
+  interact_hitbox.debug = true
   interact_hitbox.physics = DYN;
-
-  ingredients = {};
-
-  tomato = new Ingredient("tomato", {"CHOP":"cut_tomato"}, tomatoImg);
-  lettuce = new Ingredient("lettuce", {"CHOP":"cut_lettuce"}, lettuceImg);
-  onion = new Ingredient("onion", {"CHOP":"cut_onion"}, onionImg);
-  cut_onion = new Ingredient("cut_onion", {}, cut_onionsImg);
-}
-
-
-function draw() {
-
-  background(200);
-  let frame = floor(frameCount / 10) % character.frames.length;
-  character.image = character.frames[frame];
-
-  character.overlaps(interact_hitbox);
-
-  drawSprites();
-
 
   //item_held = new Sprite(250, 250, 20)
   //item_held.physics = STATIC;
