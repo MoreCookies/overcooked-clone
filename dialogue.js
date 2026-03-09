@@ -5,10 +5,10 @@ let saveButton, nahButton;
 let potatoKing;
 
 function preload() {
-  // worldFire = loadImage("assets/world_fire.png");
-  // cytoplasmBG = loadImage("assets/cytoplasm.png");
+  backgroundlol = loadImage("assets/backgroundlol.png");
   // kitchenBG = loadImage("assets/kitchen.png");
   potatoImg = loadImage("assets/potatoking.png");
+  titlepage = loadImage("assets/titlepage.png");
 }
 
 function setup() {
@@ -27,19 +27,11 @@ function draw() {
 
 //Start Page Scene
 function drawStartScene() {
-  // image(worldFire, 0, 0, width, height);
-  background(150, 30, 30);
-
-  fill(255);
+  image(titlepage, 0, 0, width, height);
+  fill(0);
   textAlign(CENTER, CENTER);
   textSize(44);
   textStyle(BOLD);
-
-  text(
-    "Oh No, The Beast is Hungry!\nWe must save the world from their wrath!",
-    width/2,
-    height/2 - 150
-  );
 
   saveButton.display();
   nahButton.display();
@@ -50,14 +42,7 @@ function drawStartScene() {
 
 function drawIntroScene() {
 
-  // image(cytoplasmBG, 0, 0, width, height);
-  background(70, 40, 15);
-
-  // Placeholder monster eyes
-  fill(255);
-  ellipse(250, 150, 25); ellipse(285, 150, 25);
-  ellipse(450, 180, 25); ellipse(485, 180, 25);
-  ellipse(650, 160, 25); ellipse(685, 160, 25);
+image(backgroundlol, 0, 0, width, height);
 
   potatoKing.display();
 
