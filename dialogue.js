@@ -33,6 +33,12 @@ function drawStartScene() {
   textSize(44);
   textStyle(BOLD);
 
+  text(
+    "Oh No, The Beast is Hungry!\nWe must save the world from their wrath!",
+    width/2,
+    height/2 - 150
+  );
+
   saveButton.display();
   nahButton.display();
   // Troll dialogue 
@@ -42,7 +48,7 @@ function drawStartScene() {
 
 function drawIntroScene() {
 
-image(backgroundlol, 0, 0, width, height);
+  image(backgroundlol, 0, 0, width, height);
 
   potatoKing.display();
 

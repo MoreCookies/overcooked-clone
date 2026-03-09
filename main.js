@@ -13,7 +13,7 @@ let direction = Math.PI/2;
 let obstacles = [];
 let in_focus = [];
 
-let item_held = "tomato";
+let item_held = "lettuce";
 
 //For next dish game logic
 let dish_recipes;
@@ -24,23 +24,47 @@ let remaining_dishes = 10-Math.floor(Math.random()*3)
 //let inventory = null;
 
 function preload() {
-  // worldFire = loadImage("assets/world_fire.png");
-  // cytoplasmBG = loadImage("assets/cytoplasm.png");
+  backgroundlol = loadImage("assets/backgroundlol.png");
   // kitchenBG = loadImage("assets/kitchen.png");
-  // potatoImg = loadImage("assets/potato_king.png");
-  characterImg = loadImage("assets/textbox.png"); //placeholder
+  potatoImg = loadImage("assets/potatoking.png");
+  titlepage = loadImage("assets/titlepage.png");
+  characterImg = loadImage("assets/character1_right.png")
+
+  //Load items
+  tomatoImg = loadImage("assets/tomato.png")
+  lettuceImg = loadImage("assets/lettuce.png")
+  onionImg = loadImage("assets/onion.png")
+  salad2Img = loadImage("assets/salad2.png")
+  salad1Img = loadImage("assets/salad1.png")
+  boiled_tomato = loadImage("assets/boiled_tomato.png")
+  cut_onions = loadImage("assets/cut_onions.png")
+
+  tableImg = loadImage("assets/table.png")
+  choppingBoardImg = loadImage("assets/chopping_board.png")
+  returnTableImg = loadImage("assets/serve_table.png")
+  garbageImg = loadImage("assets/garbage.jpg")
 }
 
 function setup() {
+
+  tomatoImg.resize(30, 0)
+  lettuceImg.resize(30, 0)
+  onionImg.resize(30, 0)
+  tableImg.resize(50, 0)
+  choppingBoardImg.resize(50, 0)
+  returnTableImg.resize(50, 0)
+  garbageImg.resize(50, 0)
+
   new Canvas(900, 600);
-  
   saveButton = new Button(width/2 - 220, height/2 + 120, 250, 80, "SAVE THE WORLD");
   nahButton = new Button(width/2 + 20, height/2 + 120, 250, 80, "Nah");
   potatoKing = new Character(150, height - 130);
 
-  character = new Sprite(250, 250, 20);
+  character = new Sprite(250, 250, 40);
   character.color = "pink"
   character.physics = DYN;
+  character.image = characterImg
+  character.image.scale = 0.1
 
   interact_hitbox = new Sprite(250, 250, 35);
   interact_hitbox.debug = true
@@ -51,16 +75,42 @@ function setup() {
 
   character.overlaps(interact_hitbox)
   //character.overlaps(item_held)
-  
-  
-  //create obstacles
-  obstacle1 = new Obstacle(400, 400, 60, 40, "SPAWN")
-  obstacle2 = new Obstacle(465, 400, 60, 40, "CHOP")
-  obstacle3 = new Obstacle(530, 400, 60, 40, "RETURN")
 
+  //Set up items
+  //Definitions of all items, any existing instances IN THE GAME are just the NAMES OF THE ITEMS
+  ingredients  = {}
+
+  tomato = new Ingredient ("tomato", {"CHOP": "cut_tomato", "COOK": "boiled_tomato"}, tomatoImg)
+  cut_tomato = new Ingredient ("cut_tomato", {}, tomatoImg) //Cut tomato is a final processig of the tomato
+  lettuce = new Ingredient ("lettuce", {"CHOP": "cut_lettuce"}, lettuceImg)
+  cut_lettuce = new Ingredient ("cut_lettuce", {}, lettuceImg) //Cut tomato is a final processig of the tomato
+
+  ingredients[tomato.id] = tomato
+  ingredients[cut_tomato.id] = cut_tomato
+  ingredients[lettuce.id] = lettuce
+  ingredients[cut_lettuce.id] = cut_lettuce
+  imageMode(CENTER)
+
+  //Recipes for assembly of foods
+  dish_recipes  = {"salad": ["cut_tomato", "cut_lettuce"]}
+
+  //create obstacles
+  obstacle0 = new Obstacle(350, 400, 50, 50, "SPAWN", tableImg, item_spawn="tomato")
+  obstacle1 = new Obstacle(400, 400, 50, 50, "SPAWN", tableImg, item_spawn="lettuce")
+  obstacle0.item = "tomato"
+  obstacle1.item = "lettuce"
+  obstacle2 = new Obstacle(450, 400, 50, 50, "CHOP", choppingBoardImg, item_spawn=null)
+  obstacle3 = new Obstacle(500, 400, 50, 50, "GARBAGE", garbageImg, item_spawn=null)
+  obstacle4 = new Obstacle(550, 400, 50, 50, "RETURN", returnTableImg, item_spawn=null)
+  obstacle5 = new Obstacle(600, 400, 50, 50, "NONE", tableImg, item_spawn=null)
+
+  obstacles.push(obstacle0)
   obstacles.push(obstacle1)
   obstacles.push(obstacle2)
   obstacles.push(obstacle3)
+  obstacles.push(obstacle4)
+  obstacles.push(obstacle5)
+
   //Set to make invisible, temp rn
   character.visible = true
   character.layer = 2
@@ -68,26 +118,8 @@ function setup() {
     obstacles.visible = true
     interact_hitbox.overlaps(obstacles[i].obstacle_sprite)
     character.collides(obstacles[i].obstacle_sprite)
-    obstacles[i].obstacle_sprite.layer = 1
+    //obstacles[i].obstacle_sprite.layer = 1
   }
-
-
-  //Set up items
-  //Definitions of all items, any existing instances IN THE GAME are just the NAMES OF THE ITEMS
-  ingredients  = {}
-
-  tomato = new Ingredient ("tomato", {"CHOP": "cut_tomato"})
-  cut_tomato = new Ingredient ("cut_tomato", {}) //Cut tomato is a final processig of the tomato
-  lettuce = new Ingredient ("lettuce", {"CHOP": "cut_lettuce"})
-  cut_lettuce = new Ingredient ("cut_lettuce", {}) //Cut tomato is a final processig of the tomato
-
-  ingredients[tomato.id] = tomato
-  ingredients[cut_tomato.id] = cut_tomato
-  ingredients[lettuce.id] = lettuce
-  ingredients[cut_lettuce.id] = cut_lettuce
-
-  //Recipes for assembly of foods
-  dish_recipes  = {"salad": ["cut_tomato", "cut_lettuce"]}
 }
 
 function draw() {
@@ -97,6 +129,7 @@ function draw() {
     if (scene === "intro") drawIntroScene();
     if (scene === "kitchenExplain") drawKitchenScene();
   } else if (gameState == "game") {
+    character.rotation = 0;
     //Reset character velocity if it moves undirected by mouse, or reaches mouse position
     if (Math.abs(5-Math.sqrt(Math.pow(character.velocity.x,2) + Math.pow(character.velocity.y, 2))) > 0.1 ||
       Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2)) <= 5
@@ -110,10 +143,12 @@ function draw() {
     interact_hitbox.position = createVector(displaced.x, displaced.y)
     
     //Display item being held, would be an image but just ellipse as placeholder
-    if(item_held == "tomato") { fill("red") }
-    else if(item_held == "lettuce") { fill("green") }
-    ellipse(interact_hitbox.position.x, interact_hitbox.position.y, 20) //image would get imgref from 
-    noFill()
+    if(item_held) { image(ingredients[item_held].imgref, interact_hitbox.position.x, interact_hitbox.position.y) }
+    // if(item_held == "tomato") { fill("red") }
+    // else if(item_held == "lettuce") { fill("green") }
+    // ellipse(interact_hitbox.position.x, interact_hitbox.position.y, 20) //image would get imgref from 
+    // noFill()
+
     //obstacles
     for(var i = 0; i<obstacles.length;i++) {
       //Check for collision & add to focus
@@ -140,34 +175,35 @@ function draw() {
         in_focus=[closest[0]]
       }
     }
-
+    
     //interaction behaviour
     if(kb.presses("space") && in_focus.length > 0) {
       workstation_type = obstacles[in_focus[0]].type
       console.log(item_held)
+      console.log(obstacles[in_focus[0]].item_spawn)
       if(!item_held) {
         console.log("no item held!")
         if(["CHOP","COOK","BOIL"].includes(workstation_type) && obstacles[in_focus[0]].item && ingredients[obstacles[in_focus[0]].item].recipes[workstation_type]) {
           //Interact with a cooking workbench
           obstacles[in_focus[0]].interact(ingredients)
           console.log("doing some cooking!")
-        } else if(obstacles[in_focus[0]].item) {
-          //Pick up an item if it is a spawner, or there is an item to be picked up
+        } else if(workstation_type == "SPAWN") {
+          //if obstacle is a spawner
+          item_held = obstacles[in_focus[0]].item_spawn
+          console.log("picked up item from spawner")
+        } else if(obstacles[in_focus[0]].item && workstation_type != "SPAWN") {
+          //Pick up an item , or there is an item to be picked up
           item_held = obstacles[in_focus[0]].item
           obstacles[in_focus[0]].item = null
           console.log("picked up item!")
-        }  
+        }
       } else if(item_held) {
         //COMBINING TO MAKE DISH
         if(obstacles[in_focus[0]].item == "plate")
 
         //Put item down
         console.log("item held!")
-        if(obstacles[in_focus[0]].item == null) {
-          obstacles[in_focus[0]].item = item_held
-          item_held = null
-          console.log("item put down!")
-        } else if(workstation_type == "RETURN" && item_held == current_order) {
+        if(workstation_type == "RETURN" && item_held == current_order) {
           //Return dish
           item_held = null
           remaining_dishes -= 1;
@@ -177,18 +213,19 @@ function draw() {
           //Throw item away
           item_held = null
           console.log("item thrown away!")
+        } else if(obstacles[in_focus[0]].item == null && workstation_type != "SPAWN" && workstation_type != "RETURN") {
+          obstacles[in_focus[0]].item = item_held
+          item_held = null
+          console.log("item put down!")
         }
       }
     }
   }
 }
-
-//Start Page Scene
+// start page scene
 function drawStartScene() {
-  // image(worldFire, 0, 0, width, height);
-  background(150, 30, 30);
-
-  fill(255);
+  image(titlepage, 0, 0, width, height);
+  fill(0);
   textAlign(CENTER, CENTER);
   textSize(44);
   textStyle(BOLD);
@@ -204,17 +241,11 @@ function drawStartScene() {
   // Troll dialogue 
   if (text_bubble) text_bubble.updateCenter();
 }
+
 //Intro Scene
 function drawIntroScene() {
 
-  // image(cytoplasmBG, 0, 0, width, height);
-  background(70, 40, 15);
-
-  // Placeholder monster eyes
-  fill(255);
-  ellipse(250, 150, 25); ellipse(285, 150, 25);
-  ellipse(450, 180, 25); ellipse(485, 180, 25);
-  ellipse(650, 160, 25); ellipse(685, 160, 25);
+  image(backgroundlol, 0, 0, width, height);
 
   potatoKing.display();
 
@@ -250,12 +281,15 @@ function mouseClicked() {
       if (saveButton.isClicked()) {
         scene = "intro";
         text_bubble = new Dialogue([
-          "We don’t have much time for introductions.\nHi tRNA, my name is Potato King IV...",
-          "AND WE ARE DOOMED!",
-          "You are our last hope.\nYou must feed all these monsters before the timer runs out!",
-          "I have provided everything you need in my restaurant 'Potato's Cytoplasm'.",
-          "You will work in Ribosome 1.",
-          "I'll act as RNA Polymerase and break down vile creatures' orders (DNA genes)\ninto recipes (mRNA) at the nucleus front desk."
+        ".....", 
+        "We don’t have much time for introductions.\nHi tRNA, my name is Potato King IV… AND WE ARE DOOMED!", 
+        "You are our last hope… you must feed all these monsters before the timer runs out!",
+        " Don’t worry;  I’ve provided you everything you need in my restaurant, Potato’s Cytoplasm.",
+       "I’ll act as your RNA Polymerase,\nand I’ll break down each monster’s multi-dish order \n( each one of these monsters’ orders is like one gene in DNA)  into recipes, or mRNA.",
+        "These creatures speak a weird form of English: \nmost of it looks normal, but some letters change (T → U), \nand I’ve translated them for you.",
+        "Some monsters get feisty, so I’ve added a little extra paper at the end of the receipt ( your poly-A tail) \nto make sure their orders survive any chaos.", 
+        "Of course, monsters are picky: some don’t want onions or lettuce, that's your introns, the little instructions scattered through the ticket.",
+        "Every ticket has a heading (methyl cap) to tell you which monster this meal is for. Now let’s go to your kitchen…"
         ]);
       }
       if (nahButton.isClicked()) {
@@ -274,16 +308,13 @@ function mouseClicked() {
     } else if (text_bubble.finished() && scene == "intro") {
       scene = "kitchenExplain";
       text_bubble = new Dialogue([
-        "This will be your kitchen (Ribosome 1).",
-        "Your kitchen has different parts (rRNA): worktop, sink, oven, fridge...",
-        "You can collect ingredients from each station.",
-        "You have 3:00 minutes.",
-        "When the timer hits 0:00 (stop codon), the monster roars (release factor)...",
-        "Which means TIME'S UP 😨",
-        "Before starting any order (mRNA), you must place ONE giant plate (start codon).",
-        "Only ONE plate for ALL dishes.",
-        "Good luck, tRNA."
-      ]);
+            "This will be your kitchen, Ribosome 1. \nYour kitchen has different parts (rRNA):  your worktop, sink, oven, fridge, all the tools you need to prep the dishes.", 
+            "You, tRNA, are the chief. \nYou’ll pick up ingredients and carry them across from station to station. Every order has 3 ingredients (the codons)  that make up the dish (1 amino acid).",
+            "When you hand a dish to the counter (P site), you swap your appearance;\n you’re a new tRNA ready for the dish! The A site is where you accept the next dish recipe (mRNA).",
+            "You’ll have a single giant plate for the whole order. That’s your start codon… place it first before cooking. \nThen follow the mRNA ticket exactly: ingredient by ingredient.",
+            "You have 3:00 minutes. When the timer hits 0:00 (stop codon), the monster will roar (release factor). \nFinish in time or… 😨",
+            "Now get to it! \nYour monsters are hungry, time is running, and Potato King IV is counting on you!"
+          ]);
     } else if (text_bubble.finished() && scene == "kitchenExplain") {
       gameState = "game"
       //Show all sprites
@@ -411,13 +442,6 @@ class Character {
   }
 
   display() {
-    // image(potatoImg, this.x - 90, this.y - 140, 180, 220);
-    fill(190, 140, 80);
-    ellipse(this.x, this.y, 160, 200);
-
-    fill(0);
-    textAlign(CENTER, CENTER);
-    textSize(40);
-    text("👑", this.x, this.y - 120);
+    image(potatoImg, this.x - 200, this.y - 450, 1000, 1000);
   }
 }
