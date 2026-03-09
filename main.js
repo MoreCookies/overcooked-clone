@@ -20,6 +20,7 @@ let dish_recipes;
 let ingredients;
 let current_order;
 let remaining_dishes = 10-Math.floor(Math.random()*3)
+console.log(remaining_dishes)
 
 //let inventory = null;
 
@@ -37,7 +38,7 @@ function preload() {
   salad2Img = loadImage("assets/salad2.png")
   salad1Img = loadImage("assets/salad1.png")
   boiled_tomato = loadImage("assets/boiled_tomato.png")
-  cut_onions = loadImage("assets/cut_onions.png")
+  cut_onionsImg = loadImage("assets/cut_onions.png")
 
   tableImg = loadImage("assets/table.png")
   choppingBoardImg = loadImage("assets/chopping_board.png")
@@ -46,7 +47,6 @@ function preload() {
 }
 
 function setup() {
-
   tomatoImg.resize(30, 0)
   lettuceImg.resize(30, 0)
   onionImg.resize(30, 0)
@@ -54,6 +54,8 @@ function setup() {
   choppingBoardImg.resize(50, 0)
   returnTableImg.resize(50, 0)
   garbageImg.resize(50, 0)
+  salad1Img.resize(30, 0)
+  cut_onionsImg.resize(30, 0)
 
   new Canvas(900, 600);
   saveButton = new Button(width/2 - 220, height/2 + 120, 250, 80, "SAVE THE WORLD");
@@ -84,32 +86,53 @@ function setup() {
   cut_tomato = new Ingredient ("cut_tomato", {}, tomatoImg) //Cut tomato is a final processig of the tomato
   lettuce = new Ingredient ("lettuce", {"CHOP": "cut_lettuce"}, lettuceImg)
   cut_lettuce = new Ingredient ("cut_lettuce", {}, lettuceImg) //Cut tomato is a final processig of the tomato
+  onion = new Ingredient ("onion", {"CHOP": "cut_onion"}, onionImg)
+  cut_onion = new Ingredient ("cut_onion", {}, cut_onionsImg)
+
+  salad1 = new Ingredient("salad1", {}, salad1Img)
+  salad2 = new Ingredient("salad2", {}, salad2Img)
 
   ingredients[tomato.id] = tomato
   ingredients[cut_tomato.id] = cut_tomato
   ingredients[lettuce.id] = lettuce
   ingredients[cut_lettuce.id] = cut_lettuce
+  ingredients[onion.id] = onion
+  ingredients[cut_onion.id] = cut_onion
+  ingredients[salad1.id] = salad1
+  ingredients[salad2.id] = salad2
+  
+
   imageMode(CENTER)
 
   //Recipes for assembly of foods
-  dish_recipes  = {"salad": ["cut_tomato", "cut_lettuce"]}
+  dish_recipes  = {"salad1": ["cut_lettuce", "cut_onion"], "salad2": ["cut_lettuce", "cut_tomato"]}
+
+  current_order = Object.keys(dish_recipes)[Math.floor(Math.random()*Object.keys(dish_recipes).length)]
+  console.log(current_order)
 
   //create obstacles
-  obstacle0 = new Obstacle(350, 400, 50, 50, "SPAWN", tableImg, item_spawn="tomato")
+  obstaclea = new Obstacle(300, 400, 50, 50, "SPAWN", tableImg, item_spawn="tomato")
+  obstacle0 = new Obstacle(350, 400, 50, 50, "SPAWN", tableImg, item_spawn="onion")
   obstacle1 = new Obstacle(400, 400, 50, 50, "SPAWN", tableImg, item_spawn="lettuce")
-  obstacle0.item = "tomato"
+  obstaclea.item = "tomato"
+  obstacle0.item = "onion"
   obstacle1.item = "lettuce"
   obstacle2 = new Obstacle(450, 400, 50, 50, "CHOP", choppingBoardImg, item_spawn=null)
   obstacle3 = new Obstacle(500, 400, 50, 50, "GARBAGE", garbageImg, item_spawn=null)
   obstacle4 = new Obstacle(550, 400, 50, 50, "RETURN", returnTableImg, item_spawn=null)
   obstacle5 = new Obstacle(600, 400, 50, 50, "NONE", tableImg, item_spawn=null)
+  obstacle6 = new Obstacle(650, 400, 50, 50, "NONE", tableImg, item_spawn=null)
+  obstacle7 = new Obstacle(650, 400, 50, 50, "NONE", tableImg, item_spawn=null)
 
+  obstacles.push(obstaclea)
   obstacles.push(obstacle0)
   obstacles.push(obstacle1)
   obstacles.push(obstacle2)
   obstacles.push(obstacle3)
   obstacles.push(obstacle4)
   obstacles.push(obstacle5)
+  obstacles.push(obstacle6)
+  obstacles.push(obstacle7)
 
   //Set to make invisible, temp rn
   character.visible = true
@@ -130,6 +153,10 @@ function draw() {
     if (scene === "kitchenExplain") drawKitchenScene();
   } else if (gameState == "game") {
     character.rotation = 0;
+    textSize(20)
+    text(current_order, 50, 50)
+    text(dish_recipes[current_order], 50, 100)
+
     //Reset character velocity if it moves undirected by mouse, or reaches mouse position
     if (Math.abs(5-Math.sqrt(Math.pow(character.velocity.x,2) + Math.pow(character.velocity.y, 2))) > 0.1 ||
       Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2)) <= 5
@@ -180,7 +207,6 @@ function draw() {
     if(kb.presses("space") && in_focus.length > 0) {
       workstation_type = obstacles[in_focus[0]].type
       console.log(item_held)
-      console.log(obstacles[in_focus[0]].item_spawn)
       if(!item_held) {
         console.log("no item held!")
         if(["CHOP","COOK","BOIL"].includes(workstation_type) && obstacles[in_focus[0]].item && ingredients[obstacles[in_focus[0]].item].recipes[workstation_type]) {
@@ -206,8 +232,8 @@ function draw() {
         if(workstation_type == "RETURN" && item_held == current_order) {
           //Return dish
           item_held = null
+          current_order = Object.keys(dish_recipes)[Math.floor(Math.random()*Object.keys(dish_recipes).length)]
           remaining_dishes -= 1;
-          current_order = dish_recipes[Math.floor(Math.random()*dish_recipes.length)]
           console.log("item returned!")
         } else if (workstation_type == "GARBAGE") {
           //Throw item away
@@ -217,6 +243,27 @@ function draw() {
           obstacles[in_focus[0]].item = item_held
           item_held = null
           console.log("item put down!")
+        } else if(obstacles[in_focus[0]].item) {
+          //Try combining
+          console.log("tried combining")
+          possible_dish = [obstacles[in_focus[0]].item, item_held]
+          console.log(possible_dish)
+          for(var i = 0; i<Object.keys(dish_recipes).length;i++) {
+            //isEqual = (dish_recipes[Object.keys(dish_recipes)[i]][0] == possible_dish[0] && dish_recipes[Object.keys(dish_recipes)[i]][1] == possible_dish[1])
+            
+            isEqual = dish_recipes[Object.keys(dish_recipes)[i]].every((element, index) => element === possible_dish[index]);
+            console.log(isEqual)
+            if(isEqual) {
+              console.log("COMBIEND!")
+              item_held = Object.keys(dish_recipes)[i]
+              obstacles[in_focus[0]].item = null
+            }
+            
+            // recipe = (isEqual) ? Object.keys(dish_recipes)[i] : "";
+            // console.log(recipe)
+            // item_held = recipe
+          }
+          
         }
       }
     }

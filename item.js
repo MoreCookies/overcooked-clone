@@ -3,7 +3,7 @@ class Ingredient {
         this.id = id
         this.recipes=recipes
         this.imgref = imgref
-        
+
         //formatted like {"CHOP": "tomato_soup", "COMBINE": }
         if(this.id == "plate") { this.items = [] }
     }
