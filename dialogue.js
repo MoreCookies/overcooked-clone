@@ -8,7 +8,7 @@ function preload() {
   // worldFire = loadImage("assets/world_fire.png");
   // cytoplasmBG = loadImage("assets/cytoplasm.png");
   // kitchenBG = loadImage("assets/kitchen.png");
-  // potatoImg = loadImage("assets/potato_king.png");
+  potatoImg = loadImage("assets/potatoking.png");
 }
 
 function setup() {
@@ -91,15 +91,14 @@ function mouseClicked() {
       scene = "intro";
       text_bubble = new Dialogue([
         ".....", 
-        "We don’t have much time for introductions.\nHi tRNA, my name is Potato King IV...",
-        "AND WE ARE DOOMED!",
-        "You are our last hope.\nYou must feed all these monsters before the timer runs out!",
-        "I have provided everything you need in my restaurant 'Potato's Cytoplasm'.",
-        "You will work in Ribosome 1.",
-        "I'll act as RNA Polymerase and break down vile creatures' orders (DNA genes)\ninto recipes (mRNA) at the nucleus front desk.",
-        "They speak a weird form of English and\n,while most parts are the same,\n some words are different (T → U); I will translate them for you.",
-       "The monsters get a bit feisty so I have added some extra paper (poly-A tail) at the end of the receipt \nthat may get torn up so don’t freight your order should last.",
-      "Each of the recipes I send in will have a red top (methyl cap) to inform you they are complete recipes."  
+        "We don’t have much time for introductions.\nHi tRNA, my name is Potato King IV… AND WE ARE DOOMED!", 
+        "You are our last hope… you must feed all these monsters before the timer runs out!",
+        " Don’t worry;  I’ve provided you everything you need in my restaurant, Potato’s Cytoplasm.",
+       "I’ll act as your RNA Polymerase,\nand I’ll break down each monster’s multi-dish order \n( each one of these monsters’ orders is like one gene in DNA)  into recipes, or mRNA.",
+        "These creatures speak a weird form of English: \nmost of it looks normal, but some letters change (T → U), \nand I’ve translated them for you.",
+        "Some monsters get feisty, so I’ve added a little extra paper at the end of the receipt ( your poly-A tail) \nto make sure their orders survive any chaos.", 
+        "Of course, monsters are picky: some don’t want onions or lettuce, that's your introns, the little instructions scattered through the ticket.",
+        "Every ticket has a heading (methyl cap) to tell you which monster this meal is for. Now let’s go to your kitchen…"
      ]);
     }
 
@@ -130,15 +129,12 @@ function mouseClicked() {
         if (scene === "intro") {
           scene = "kitchenExplain";
           text_bubble = new Dialogue([
-            "This will be your kitchen (Ribosome 1).",
-            "Your kitchen has different parts (rRNA): worktop, sink, oven, fridge...",
-            "You can collect ingredients from each station.",
-            "You have 3:00 minutes.",
-            "When the timer hits 0:00 (stop codon), the monster roars (release factor)...",
-            "Which means TIME'S UP 😨",
-            "Before starting any order (mRNA), you must place ONE giant plate (start codon).",
-            "Only ONE plate for ALL dishes.",
-            "Good luck, tRNA."
+            "This will be your kitchen, Ribosome 1. \nYour kitchen has different parts (rRNA):  your worktop, sink, oven, fridge, all the tools you need to prep the dishes.", 
+            "You, tRNA, are the chief. \nYou’ll pick up ingredients and carry them across from station to station. Every order has 3 ingredients (the codons)  that make up the dish (1 amino acid).",
+            "When you hand a dish to the counter (P site), you swap your appearance;\n you’re a new tRNA ready for the dish! The A site is where you accept the next dish recipe (mRNA).",
+            "You’ll have a single giant plate for the whole order. That’s your start codon… place it first before cooking. \nThen follow the mRNA ticket exactly: ingredient by ingredient.",
+            "You have 3:00 minutes. When the timer hits 0:00 (stop codon), the monster will roar (release factor). \nFinish in time or… 😨",
+            "Now get to it! \nYour monsters are hungry, time is running, and Potato King IV is counting on you!"
           ]);
         } else {
           text_bubble = null;
@@ -247,13 +243,6 @@ class Character {
   }
 
   display() {
-    // image(potatoImg, this.x - 90, this.y - 140, 180, 220);
-    fill(190, 140, 80);
-    ellipse(this.x, this.y, 160, 200);
-
-    fill(0);
-    textAlign(CENTER, CENTER);
-    textSize(40);
-    text("👑", this.x, this.y - 120);
+    image(potatoImg, this.x - 200, this.y - 450, 1000, 1000);
   }
 }
