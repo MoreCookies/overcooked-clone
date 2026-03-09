@@ -26,7 +26,7 @@ console.log(remaining_dishes)
 
 function preload() {
   backgroundlol = loadImage("assets/backgroundlol.png");
-  // kitchenBG = loadImage("assets/kitchen.png");
+  kitchenBG = loadImage("assets/kitchenfloor.png");
   potatoImg = loadImage("assets/potatoking.png");
   titlepage = loadImage("assets/titlepage.png");
   characterImg1 = loadImage("assets/character_right1.png")
@@ -67,7 +67,8 @@ function setup() {
   nahButton = new Button(width/2 + 20, height/2 + 120, 250, 80, "Nah");
   potatoKing = new Character(150, height - 130);
 
-  character = new Sprite(250,250,40);
+  character = new Sprite(250, 250, 40);
+  character.color = "pink"
   character.physics = DYN;
 
   character.frames = [characterImg1, characterImg2];
