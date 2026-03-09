@@ -26,7 +26,7 @@ console.log(remaining_dishes)
 
 function preload() {
   backgroundlol = loadImage("assets/backgroundlol.png");
-  // kitchenBG = loadImage("assets/kitchen.png");
+  kitchenBG = loadImage("assets/kitchenfloor.png");
   potatoImg = loadImage("assets/potatoking.png");
   titlepage = loadImage("assets/titlepage.png");
   characterImg = loadImage("assets/character1_right.png")
