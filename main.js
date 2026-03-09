@@ -300,12 +300,6 @@ function drawStartScene() {
   textSize(44);
   textStyle(BOLD);
 
-  text(
-    "Oh No, The Beast is Hungry!\nWe must save the world from their wrath!",
-    width/2,
-    height/2 - 150
-  );
-
   saveButton.display();
   nahButton.display();
   // Troll dialogue 
@@ -382,8 +376,8 @@ function mouseClicked() {
             "You, tRNA, are the chief. \nYou’ll pick up ingredients and carry them across from station to station. Every order has 3 ingredients (the codons)  that make up the dish (1 amino acid).",
             "When you hand a dish to the counter (P site), you swap your appearance;\n you’re a new tRNA ready for the dish! The A site is where you accept the next dish recipe (mRNA).",
             "You’ll have a single giant plate for the whole order. That’s your start codon… place it first before cooking. \nThen follow the mRNA ticket exactly: ingredient by ingredient.",
-            "You have 3:00 minutes. When the timer hits 0:00 (stop codon), the monster will roar (release factor). \nFinish in time or… 😨",
-            "Now get to it! \nYour monsters are hungry, time is running, and Potato King IV is counting on you!"
+            "When you finish the last dish (stop codon), the monster will roar (release factor). \nIf it roars happily, you win! If it roars angrily, you lose. Now get to it!",
+            "Now get to it! \nYour monsters are hungry and Potato King IV is counting on you!"
           ]);
     } else if (text_bubble.finished() && scene == "kitchenExplain") {
       gameState = "game"
