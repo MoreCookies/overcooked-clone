@@ -46,11 +46,11 @@ function setup() {
   interact_hitbox.debug = true
   interact_hitbox.physics = DYN;
 
-  item_held = new Sprite(250, 250, 20)
-  item_held.physics = STATIC;
+  //item_held = new Sprite(250, 250, 20)
+  //item_held.physics = STATIC;
 
   character.overlaps(interact_hitbox)
-  character.overlaps(item_held)
+  //character.overlaps(item_held)
   
   
   //create obstacles
@@ -74,17 +74,17 @@ function setup() {
 
   //Set up items
   //Definitions of all items, any existing instances IN THE GAME are just the NAMES OF THE ITEMS
-  ingredients  = []
+  ingredients  = {}
 
   tomato = new Ingredient ("tomato", {"CHOP": "cut_tomato"})
   cut_tomato = new Ingredient ("cut_tomato", {}) //Cut tomato is a final processig of the tomato
   lettuce = new Ingredient ("lettuce", {"CHOP": "cut_lettuce"})
   cut_lettuce = new Ingredient ("cut_lettuce", {}) //Cut tomato is a final processig of the tomato
 
-  ingredients.push(tomato)
-  ingredients.push(cut_tomato)
-  ingredients.push(lettuce)
-  ingredients.push(cut_lettuce)
+  ingredients[tomato.id] = tomato
+  ingredients[cut_tomato.id] = cut_tomato
+  ingredients[lettuce.id] = lettuce
+  ingredients[cut_lettuce.id] = cut_lettuce
 
   //Recipes for assembly of foods
   dish_recipes  = {"salad": ["cut_tomato", "cut_lettuce"]}
@@ -117,9 +117,10 @@ function draw() {
     //obstacles
     for(var i = 0; i<obstacles.length;i++) {
       //Check for collision & add to focus
-      obstacles[i].display()
+      //obstacles[i].display()
       if (character.collides(obstacles[i].obstacle_sprite)) { character.velocity = createVector(0,0) }
       if(interact_hitbox.overlapping(obstacles[i].obstacle_sprite)) { obstacles[i].focus = true; }
+      else if (in_focus.includes(i)) { in_focus.splice(in_focus.indexOf(i)); obstacles[i].focus = false }
       else { obstacles[i].focus = false }
       
       if(!in_focus.includes(i) && obstacles[i].focus) { in_focus.push(i) }
@@ -143,29 +144,39 @@ function draw() {
     //interaction behaviour
     if(kb.presses("space") && in_focus.length > 0) {
       workstation_type = obstacles[in_focus[0]].type
-      console.log(workstation_type)
+      console.log(item_held)
       if(!item_held) {
-        if(obstacles[in_focus[0]].item) {
+        console.log("no item held!")
+        if(["CHOP","COOK","BOIL"].includes(workstation_type) && obstacles[in_focus[0]].item && ingredients[obstacles[in_focus[0]].item].recipes[workstation_type]) {
+          //Interact with a cooking workbench
+          obstacles[in_focus[0]].interact(ingredients)
+          console.log("doing some cooking!")
+        } else if(obstacles[in_focus[0]].item) {
           //Pick up an item if it is a spawner, or there is an item to be picked up
           item_held = obstacles[in_focus[0]].item
           obstacles[in_focus[0]].item = null
-        } else if(["CHOP","COOK","BOIL"].includes(workstation_type) && obstacles[in_focus[0]].item) {
-          //Interact with a cooking workbench
-          obstacles[in_focus[0]].interact(ingredients)
-        }
+          console.log("picked up item!")
+        }  
       } else if(item_held) {
+        //COMBINING TO MAKE DISH
+        if(obstacles[in_focus[0]].item == "plate")
+
         //Put item down
+        console.log("item held!")
         if(obstacles[in_focus[0]].item == null) {
           obstacles[in_focus[0]].item = item_held
           item_held = null
+          console.log("item put down!")
         } else if(workstation_type == "RETURN" && item_held == current_order) {
           //Return dish
           item_held = null
           remaining_dishes -= 1;
           current_order = dish_recipes[Math.floor(Math.random()*dish_recipes.length)]
+          console.log("item returned!")
         } else if (workstation_type == "GARBAGE") {
           //Throw item away
           item_held = null
+          console.log("item thrown away!")
         }
       }
     }
