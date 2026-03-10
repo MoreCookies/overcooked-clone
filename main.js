@@ -40,6 +40,9 @@ function preload() {
   salad1Img = loadImage("assets/salad1.png")
   boiled_tomato = loadImage("assets/boiled_tomato.png")
   cut_onionsImg = loadImage("assets/cut_onions.png")
+  cut_lettuceImg = loadImage("assets/cutlettuce.png")
+  cut_tomatoImg = loadImage("assets/cuttomato.png")
+  cut_cucumberImg = loadImage("assets/cutcucumber.png")
 
   tableImg = loadImage("assets/table.png")
   choppingBoardImg = loadImage("assets/chopping_board.png")
@@ -58,6 +61,9 @@ function setup() {
   salad1Img.resize(30, 0)
   salad2Img.resize(30, 0)
   cut_onionsImg.resize(30, 0)
+  cut_lettuceImg.resize(35, 0)
+  cut_tomatoImg.resize(35, 0)
+
 
   characterImg1.resize(40, 0)
   characterImg2.resize(40, 0)
@@ -93,10 +99,12 @@ function setup() {
 
   ingredients = {};
 
-  tomato = new Ingredient("tomato", {"CHOP":"cut_tomato"}, tomatoImg);
-  lettuce = new Ingredient("lettuce", {"CHOP":"cut_lettuce"}, lettuceImg);
+  tomato = new Ingredient("tomato", {"CHOP":"cut_tomato"},tomatoImg);
+  lettuce = new Ingredient("lettuce", {"CHOP":"cut_lettuce"},lettuceImg);
   onion = new Ingredient("onion", {"CHOP":"cut_onion"}, onionImg);
+  cut_lettuce = new Ingredient("cut_lettuce", {}, cut_lettuceImg);
   cut_onion = new Ingredient("cut_onion", {}, cut_onionsImg);
+  cut_tomato = new Ingredient("cut_tomato", {}, cut_tomatoImg);
 
   character.overlaps(interact_hitbox)
 
@@ -105,9 +113,9 @@ function setup() {
   ingredients  = {}
 
   tomato = new Ingredient ("tomato", {"CHOP": "cut_tomato", "COOK": "boiled_tomato"}, tomatoImg)
-  cut_tomato = new Ingredient ("cut_tomato", {}, tomatoImg) //Cut tomato is a final processig of the tomato
+  cut_tomato = new Ingredient ("cut_tomato", {}, cut_tomatoImg) //Cut tomato is a final processig of the tomato
   lettuce = new Ingredient ("lettuce", {"CHOP": "cut_lettuce"}, lettuceImg)
-  cut_lettuce = new Ingredient ("cut_lettuce", {}, lettuceImg) //Cut tomato is a final processig of the tomato
+  cut_lettuce = new Ingredient ("cut_lettuce", {}, cut_lettuceImg) //Cut tomato is a final processig of the tomato
   onion = new Ingredient ("onion", {"CHOP": "cut_onion"}, onionImg)
   cut_onion = new Ingredient ("cut_onion", {}, cut_onionsImg)
 
