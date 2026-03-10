@@ -1,11 +1,10 @@
-Protein synthesis analogy project!
 # Overview
-A WIP clone of the game Overcooked in p5.js with p5.play.
+A basic clone of the game Overcooked in p5.js with p5.play, and our protein synthesis analogy project for Biology 12!
 
-The simplified game will have the following features: 
+The simplified game has the following features: 
 
 Player
-- Movement → smooth? 
+- Click to move movement
 - Pick up objects
 - Drop objects
 - Interact with tools
@@ -14,12 +13,13 @@ Player
 Item class
 - Interactables → can be chopped, can be cooked…
 - Sprite
-- Combining
+- Combining to make dishes
 
 Game
-- Timer
 - Game state → “cutscene”, “finish”, “game”
 - Orders system → display, update
+- Analogy explanation cutscene
+- End scene
 
 Obstacle class
 - Collision
@@ -34,7 +34,7 @@ DNA → All the monsters - orders combined \
 mRNA → All the orders on 1 ticket, which go from the cashier to the kitchen \
 RNA polymerase → Cashier (sends recipe and prints an mRNA) \
 Methyl Cap → Heading of order ticket → “[restaurant name] Order #..." \
-Poly-A Tail → Footer of order ticket → “thanks for dining at [restaurant]” \
+Poly-A Tail → Extra paper at end of receipt to "protect" it \
 Introns/Exons → Filler stuff on the order ticket 
 - e.g. Customer requests “no pickles on the burger please”, or “put happy birthday on the box” or “50% ice less sugar” \
 ATCG vs. AUCG → menu orders vs. way the kitchen receives orders 
