@@ -517,3 +517,29 @@ class Character {
     image(potatoImg, this.x - 200, this.y - 450, 1000, 1000);
   }
 }
+function drawEndScene() {
+  background(200);
+  if (endSceneAssets.bg) image(endSceneAssets.bg, width/2, height/2, width, height);
+  if (endSceneAssets.potatoKingSmile) image(endSceneAssets.potatoKingSmile, width/2, height/2 + 50, 300, 300);
+
+  fill(255); stroke(0);
+  rect(width/2 - 150, 50, 300, 80, 20);
+  fill(0); textAlign(CENTER, CENTER); textSize(28);
+  text("YAY! U did it!", width/2, 90);
+
+  let assetsToShow = [
+    {id: "d", x: 150, y: 400, img: endSceneClicked.d ? endSceneAssets.d2 : endSceneAssets.d1},
+    {id: "n", x: 400, y: 400, img: endSceneClicked.n ? endSceneAssets.n2 : endSceneAssets.n1},
+    {id: "a", x: 650, y: 400, img: endSceneClicked.a ? endSceneAssets.a2 : endSceneAssets.a1},
+  ];
+
+  assetsToShow.forEach(obj => { if(obj.img) image(obj.img, obj.x, obj.y, 100, 100); });
+}
+
+function handleEndSceneClicks() {
+  let positions = {d:{x:150,y:400}, n:{x:400,y:400}, a:{x:650,y:400}};
+  for(let key in positions) {
+    let pos = positions[key];
+    if(dist(mouseX, mouseY, pos.x, pos.y) < 50) endSceneClicked[key] = !endSceneClicked[key];
+  }
+}
