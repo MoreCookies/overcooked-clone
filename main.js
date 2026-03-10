@@ -1,10 +1,13 @@
 let scene = "start";
 let text_bubble = null;
 
+let endSceneAssets = {};
+let endSceneClicked = {d: false, n: false, a: false};
+
 let saveButton, nahButton;
 let potatoKing;
 
-let gameState = "game"; //change back to cutscene later
+let gameState = "cutscene"; //change back to cutscene later
 
 let mouseClicked_X;
 let mouseClicked_Y;
@@ -13,13 +16,13 @@ let direction = Math.PI/2;
 let obstacles = [];
 let in_focus = [];
 
-let item_held = "lettuce";
+let item_held = "";
 
 //For next dish game logic
 let dish_recipes;
 let ingredients;
 let current_order;
-let remaining_dishes = 10-Math.floor(Math.random()*3)
+let remaining_dishes = 4-Math.floor(Math.random()*3)
 console.log(remaining_dishes)
 
 //let inventory = null;
@@ -31,59 +34,94 @@ function preload() {
   titlepage = loadImage("assets/titlepage.png");
   characterImg1 = loadImage("assets/character_right1.png")
   characterImg2 = loadImage("assets/character_right2.png")
+  characterImg11 = loadImage("assets/character_right11.png")
+  characterImg21 = loadImage("assets/character_right21.png")
+  characterImg12 = loadImage("assets/character31.png")
+  characterImg22 = loadImage("assets/character32.png")
+
 
   //Load items
   tomatoImg = loadImage("assets/tomato.png")
   lettuceImg = loadImage("assets/lettuce.png")
   onionImg = loadImage("assets/onion.png")
+  cucumberImg = loadImage("assets/cucumber.png")
   salad2Img = loadImage("assets/salad2.png")
   salad1Img = loadImage("assets/salad1.png")
+  tomato_soupImg = loadImage("assets/tomato_soup.png")
   boiled_tomato = loadImage("assets/boiled_tomato.png")
   cut_onionsImg = loadImage("assets/cut_onions.png")
   cut_lettuceImg = loadImage("assets/cutlettuce.png")
   cut_tomatoImg = loadImage("assets/cuttomato.png")
   cut_cucumberImg = loadImage("assets/cutcucumber.png")
+  boiled_tomatoImg = loadImage("assets/boiled_tomato.png")
 
   tableImg = loadImage("assets/table.png")
   choppingBoardImg = loadImage("assets/chopping_board.png")
   returnTableImg = loadImage("assets/serve_table.png")
   garbageImg = loadImage("assets/garbage.jpg")
+  fryingPanImg = loadImage("assets/frying_pan.png")
+  
+  endSceneAssets.bg = loadImage("assets/kitchenfloor.png");
+  endSceneAssets.potatoKingSmile = loadImage("assets/potatokingsmile.png");
+  endSceneAssets.d1 = loadImage("assets/d1.png");
+  endSceneAssets.d2 = loadImage("assets/d2.png");
+  endSceneAssets.n1 = loadImage("assets/n1.png");
+  endSceneAssets.n2 = loadImage("assets/n2.png");
+  endSceneAssets.a1 = loadImage("assets/a1.png");
+  endSceneAssets.a2 = loadImage("assets/a2.png");
+
+  potatoKingScared =  loadImage("assets/potatoking_scared.png")
+  
+  //endScene = loadImage("assets/endscene.png")
 }
 
 function setup() {
   tomatoImg.resize(30, 0)
   lettuceImg.resize(30, 0)
   onionImg.resize(30, 0)
+  cucumberImg.resize(30,0)
   tableImg.resize(50, 0)
   choppingBoardImg.resize(50, 0)
   returnTableImg.resize(50, 0)
+  fryingPanImg.resize(50,0)
   garbageImg.resize(50, 0)
   salad1Img.resize(30, 0)
   salad2Img.resize(30, 0)
   cut_onionsImg.resize(30, 0)
   cut_lettuceImg.resize(35, 0)
   cut_tomatoImg.resize(35, 0)
-
+  cut_cucumberImg.resize(35, 0)
+  boiled_tomatoImg.resize(35,0)
+  tomato_soupImg.resize(35,0)
 
   characterImg1.resize(40, 0)
   characterImg2.resize(40, 0)
+  characterImg11.resize(40, 0)
+  characterImg21.resize(40, 0)
+  characterImg12.resize(40, 0)
+  characterImg22.resize(40, 0)
+  //endScene.resize(500, 0)
+  potatoKingScared.resize(200, 0)
 
   new Canvas(900, 600);
   saveButton = new Button(width/2 - 220, height/2 + 120, 250, 80, "SAVE THE WORLD");
   nahButton = new Button(width/2 + 20, height/2 + 120, 250, 80, "Nah");
   potatoKing = new Character(150, height - 130);
 
-  character = new Sprite(250, 250, 40);
+  character = new Sprite(150, 300, 40);
   character.color = "pink"
   character.physics = DYN;
 
-  character.frames = [characterImg1, characterImg2];
-  character.frameIndex = 0;
+  anim1 = [characterImg1, characterImg2];
+  anim2 = [characterImg11, characterImg21]
+  anim3 = [characterImg12, characterImg22]
+  //character.frameIndex = 0;
 
-  character.image = character.frames[0];
+  character.image = anim1[0];
   
   interact_hitbox = new Sprite(250,250,35);
-  interact_hitbox.debug = true;
+  //interact_hitbox.debug = true;
+  interact_hitbox.visible = false
   interact_hitbox.physics = DYN;
   angleMode(DEGREES)
 
@@ -93,18 +131,9 @@ function setup() {
     if(direction > Math.PI/2) { scale(-1, 1) }
     image(character.image, 0, 0)
     pop()
-    pop() //pops the draw translations
-    if(item_held) { image(ingredients[item_held].imgref, interact_hitbox.position.x, interact_hitbox.position.y) }
+    temp = createVector(30*Math.cos(direction),30*Math.sin(direction))
+    if(item_held) { image(ingredients[item_held].imgref, temp.x, temp.y) }
   }
-
-  ingredients = {};
-
-  tomato = new Ingredient("tomato", {"CHOP":"cut_tomato"},tomatoImg);
-  lettuce = new Ingredient("lettuce", {"CHOP":"cut_lettuce"},lettuceImg);
-  onion = new Ingredient("onion", {"CHOP":"cut_onion"}, onionImg);
-  cut_lettuce = new Ingredient("cut_lettuce", {}, cut_lettuceImg);
-  cut_onion = new Ingredient("cut_onion", {}, cut_onionsImg);
-  cut_tomato = new Ingredient("cut_tomato", {}, cut_tomatoImg);
 
   character.overlaps(interact_hitbox)
 
@@ -113,11 +142,18 @@ function setup() {
   ingredients  = {}
 
   tomato = new Ingredient ("tomato", {"CHOP": "cut_tomato", "COOK": "boiled_tomato"}, tomatoImg)
-  cut_tomato = new Ingredient ("cut_tomato", {}, cut_tomatoImg) //Cut tomato is a final processig of the tomato
+  cut_tomato = new Ingredient ("cut_tomato", {}, cut_tomatoImg) //Cut tomato is a final processing of the tomato
+  boiled_tomato = new Ingredient ("boiled_tomato", {}, boiled_tomatoImg)
+
   lettuce = new Ingredient ("lettuce", {"CHOP": "cut_lettuce"}, lettuceImg)
-  cut_lettuce = new Ingredient ("cut_lettuce", {}, cut_lettuceImg) //Cut tomato is a final processig of the tomato
+  cut_lettuce = new Ingredient ("cut_lettuce", {}, cut_lettuceImg) //Cut tomato is a final processing of the tomato
   onion = new Ingredient ("onion", {"CHOP": "cut_onion"}, onionImg)
-  cut_onion = new Ingredient ("cut_onion", {}, cut_onionsImg)
+  cut_onion = new Ingredient ("cut_onion", {"COOK": "cooked_onion"}, cut_onionsImg)
+  cucumber = new Ingredient ("cucumber", {"CHOP": "cut_cucumber", cucumberImg})
+  cucumber.imgref = cucumberImg
+  cut_cucumber = new Ingredient ("cut_cucumber", {}, cut_cucumberImg)
+  cooked_onion = new Ingredient ("cooked_onion", {}, cut_onionsImg)
+  tomato_soup = new Ingredient ("tomato_soup", {}, tomato_soupImg)
 
   salad1 = new Ingredient("salad1", {}, salad1Img)
   salad2 = new Ingredient("salad2", {}, salad2Img)
@@ -130,45 +166,64 @@ function setup() {
   ingredients[cut_onion.id] = cut_onion
   ingredients[salad1.id] = salad1
   ingredients[salad2.id] = salad2
-  
-
-  imageMode(CENTER)
+  ingredients[cucumber.id] = cucumber
+  ingredients[cut_cucumber.id] = cut_cucumber
+  ingredients[boiled_tomato.id] = boiled_tomato
+  ingredients[cooked_onion.id] = cooked_onion
+  ingredients[tomato_soup.id] = tomato_soup
 
   //Recipes for assembly of foods
-  dish_recipes  = {"salad1": ["cut_lettuce", "cut_onion"], "salad2": ["cut_lettuce", "cut_tomato"]}
+  dish_recipes  = {"salad1": ["cut_lettuce", "cut_onion"], "salad2": ["cut_lettuce", "cut_tomato"], "tomato_soup": ["boiled_tomato", "cooked_onion"]}
 
   current_order = Object.keys(dish_recipes)[Math.floor(Math.random()*Object.keys(dish_recipes).length)]
   console.log(current_order)
 
   //create obstacles
-  obstaclea = new Obstacle(300, 400, 50, 50, "SPAWN", tableImg, item_spawn="tomato")
-  obstacle0 = new Obstacle(350, 400, 50, 50, "SPAWN", tableImg, item_spawn="onion")
-  obstacle1 = new Obstacle(400, 400, 50, 50, "SPAWN", tableImg, item_spawn="lettuce")
-  obstaclea.item = "tomato"
-  obstacle0.item = "onion"
-  obstacle1.item = "lettuce"
-  obstacle2 = new Obstacle(450, 400, 50, 50, "CHOP", choppingBoardImg, item_spawn=null)
-  obstacle3 = new Obstacle(500, 400, 50, 50, "GARBAGE", garbageImg, item_spawn=null)
-  obstacle4 = new Obstacle(550, 400, 50, 50, "RETURN", returnTableImg, item_spawn=null)
-  obstacle5 = new Obstacle(600, 400, 50, 50, "NONE", tableImg, item_spawn=null)
-  obstacle6 = new Obstacle(650, 400, 50, 50, "NONE", tableImg, item_spawn=null)
-  obstacle7 = new Obstacle(650, 400, 50, 50, "NONE", tableImg, item_spawn=null)
+  //Spawners
+  tomato_spawn = new Obstacle(275, 200, 50, 50, "SPAWN", tableImg, item_spawn="tomato")
+  onion_spawn = new Obstacle(325, 200, 50, 50, "SPAWN", tableImg, item_spawn="onion")
+  lettuce_spawn = new Obstacle(375, 200, 50, 50, "SPAWN", tableImg, item_spawn="lettuce")
+  cucumber_spawn = new Obstacle(225, 200, 50, 50, "SPAWN", tableImg, item_spawn="cucumber")
+  tomato_spawn.item = "tomato"
+  onion_spawn.item = "onion"
+  lettuce_spawn.item = "lettuce"
+  cucumber_spawn.item = "cucumber"
+  chop = new Obstacle(275, 400, 50, 50, "CHOP", choppingBoardImg, item_spawn=null)
+  garbage = new Obstacle(425, 200, 50, 50, "GARBAGE", garbageImg, item_spawn=null)
+  return_station = new Obstacle(475, 300, 50, 50, "RETURN", returnTableImg, item_spawn=null)
+  return_station2 = new Obstacle(475, 250, 50, 50, "RETURN", returnTableImg, item_spawn=null)
+  return_station3 = new Obstacle(475, 350, 50, 50, "RETURN", returnTableImg, item_spawn=null)
+  table = new Obstacle(475, 200, 50, 50, "NONE", tableImg, item_spawn=null)
+  frying_pan = new Obstacle(225, 400, 50, 50, "COOK", fryingPanImg, item_spawn=null)
 
-  obstacles.push(obstaclea)
-  obstacles.push(obstacle0)
-  obstacles.push(obstacle1)
-  obstacles.push(obstacle2)
-  obstacles.push(obstacle3)
-  obstacles.push(obstacle4)
-  obstacles.push(obstacle5)
-  obstacles.push(obstacle6)
-  obstacles.push(obstacle7)
+  for(var i=0; i<4;i++) {
+    obstacle1 = new Obstacle(25+50*i, 200, 50, 50, "NONE", tableImg, item_spawn=null)
+    obstacle2 = new Obstacle(25+50*i, 400, 50, 50, "NONE", tableImg, item_spawn=null)
+    obstacle3 = new Obstacle(325+50*i, 400, 50, 50, "NONE", tableImg, item_spawn=null)
+    obstacles.push(obstacle1)
+    obstacles.push(obstacle2)
+    obstacles.push(obstacle3)
+  }
+
+  obstacles.push(cucumber_spawn)
+  obstacles.push(tomato_spawn)
+  obstacles.push(onion_spawn)
+  obstacles.push(lettuce_spawn)
+  obstacles.push(chop)
+  obstacles.push(garbage)
+  obstacles.push(return_station)
+  obstacles.push(return_station2)
+  obstacles.push(return_station3)
+  obstacles.push(table)
+  obstacles.push(frying_pan)
 
   //Set to make invisible, temp rn
-  character.visible = true
+  character.visible = false
+  item_held.visible = false
+
   character.layer = 2
   for(var i = 0; i<obstacles.length;i++) {
-    obstacles.visible = true
+    obstacles[i].obstacle_sprite.visible = false
     interact_hitbox.overlaps(obstacles[i].obstacle_sprite)
     character.collides(obstacles[i].obstacle_sprite)
     //obstacles[i].obstacle_sprite.layer = 1
@@ -176,20 +231,29 @@ function setup() {
 }
 
 function draw() {
-  background("beige")
   if (gameState == "cutscene") {
     if (scene === "start") drawStartScene();
     if (scene === "intro") drawIntroScene();
     if (scene === "kitchenExplain") drawKitchenScene();
   } else if (gameState == "game") {
+    image(kitchenBG, 0, 0)
+    image(potatoKingScared, 550, 250)
     character.rotation = 0;
-    frame = floor(frameCount / 10) % character.frames.length;
-    if (character.velocity.x != 0 || character.velocity.y != 0) {character.image = character.frames[frame]; }
+    frame = floor(frameCount / 10) % 2;
+    if (character.velocity.x != 0 || character.velocity.y != 0) {
+      if(current_order == "tomato_soup") { character.image = anim1[frame]; }
+      if(current_order == "salad1") { character.image = anim2[frame] }
+      if(current_order == "salad2") { character.image = anim3[frame] }
+    }
 
     //Display orders
     textSize(20)
     text("Current amino acid: " + current_order, 50, 50)
-    text("Codon: " + dish_recipes[current_order], 50, 100)
+    imageMode(CENTER)
+    image(ingredients[current_order].imgref, 25, 50)
+    imageMode(CORNER)
+
+    text("Recipe: " + dish_recipes[current_order] + ", bowl", 50, 100)
     text("Codons remaining: " + remaining_dishes, 50, 150)
 
     //Reset character velocity if it moves undirected by mouse, or reaches mouse position
@@ -265,6 +329,16 @@ function draw() {
           current_order = Object.keys(dish_recipes)[Math.floor(Math.random()*Object.keys(dish_recipes).length)]
           
           remaining_dishes -= 1;
+          if(current_order == "tomato_soup") { character.image = anim1[frame]; }
+          if(current_order == "salad1") { character.image = anim2[frame] }
+          if(current_order == "salad2") { character.image = anim3[frame] }
+          if(remaining_dishes == 0) {
+            gameState = "finish"
+            character.visible = false
+            for(var i = 0; i<obstacles.length;i++) {
+              obstacles[i].obstacle_sprite.visible = false
+            }
+          }
           console.log("item returned!")
         } else if (workstation_type == "GARBAGE") {
           //Throw item away
@@ -280,8 +354,6 @@ function draw() {
           possible_dish = [obstacles[in_focus[0]].item, item_held]
           console.log(possible_dish)
           for(var i = 0; i<Object.keys(dish_recipes).length;i++) {
-            //isEqual = (dish_recipes[Object.keys(dish_recipes)[i]][0] == possible_dish[0] && dish_recipes[Object.keys(dish_recipes)[i]][1] == possible_dish[1])
-            
             isEqual = dish_recipes[Object.keys(dish_recipes)[i]].every((element, index) => element === possible_dish[index]);
             console.log(isEqual)
             if(isEqual) {
@@ -289,15 +361,13 @@ function draw() {
               item_held = Object.keys(dish_recipes)[i]
               obstacles[in_focus[0]].item = null
             }
-            
-            // recipe = (isEqual) ? Object.keys(dish_recipes)[i] : "";
-            // console.log(recipe)
-            // item_held = recipe
           }
           
         }
       }
     }
+  } else if (gameState == "finish") {
+    drawEndScene();
   }
 }
 // start page scene
@@ -326,8 +396,7 @@ function drawIntroScene() {
 
 //Kitchen Scene
 function drawKitchenScene() {
-  // image(kitchenBG, 0, 0, width, height);
-  background(110, 85, 50);
+  image(kitchenBG, 0, 0, width, height);
 
   fill(255);
   textAlign(CENTER, CENTER);
@@ -392,10 +461,13 @@ function mouseClicked() {
       //Show all sprites
       character.visible = true
       item_held.visible = true
+      interact_hitbox.visible = true
+      interact_hitbox.opacity = 0.1
+      if(current_order == "tomato_soup") { character.image = anim1[0]; }
+      if(current_order == "salad1") { character.image = anim2[0] }
+      if(current_order == "salad2") { character.image = anim3[0] }
       for(var i = 0; i<obstacles.length;i++) {
-        obstacles.visible = true
-        interact_hitbox.overlaps(obstacles[i].obstacle_sprite)
-        character.collides(obstacles[i].obstacle_sprite)
+        obstacles[i].obstacle_sprite.visible = true
       }
     }
   } else if (gameState == "game" && mouseClicked_X < 900 && mouseClicked_Y < 600) {
@@ -412,6 +484,8 @@ function mouseClicked() {
     //Click to move
     dist = Math.sqrt(Math.pow(character.position.x-mouseClicked_X,2)+Math.pow(character.position.y-mouseClicked_Y,2))
     character.velocity = createVector(Math.cos(direction) * 5, Math.sin(direction) * 5)
+  } else if (gameState == "finish") {
+    handleEndSceneClicks();
   }
 }
 
@@ -518,28 +592,31 @@ class Character {
   }
 }
 function drawEndScene() {
-  background(200);
-  if (endSceneAssets.bg) image(endSceneAssets.bg, width/2, height/2, width, height);
-  if (endSceneAssets.potatoKingSmile) image(endSceneAssets.potatoKingSmile, width/2, height/2 + 50, 300, 300);
+  background(255, 238, 140);
+
+  if(endSceneAssets.bg) image(endSceneAssets.bg, width, height, width, height);
+  if(endSceneAssets.potatoKingSmile) image(endSceneAssets.potatoKingSmile, -70, 170, 400, 500);
 
   fill(255); stroke(0);
-  rect(width/2 - 150, 50, 300, 80, 20);
+  rect(width/2 - 200, height - 120, 400, 80, 20);
   fill(0); textAlign(CENTER, CENTER); textSize(28);
-  text("YAY! U did it!", width/2, 90);
+  text("YAY! U did it!", width/2, height - 80);
+
+  fill('red'); textSize(100); textStyle(BOLD); textAlign(CENTER, CENTER);
+  text("ROAR! :)", width/2, 80);
 
   let assetsToShow = [
-    {id: "d", x: 150, y: 400, img: endSceneClicked.d ? endSceneAssets.d2 : endSceneAssets.d1},
-    {id: "n", x: 400, y: 400, img: endSceneClicked.n ? endSceneAssets.n2 : endSceneAssets.n1},
-    {id: "a", x: 650, y: 400, img: endSceneClicked.a ? endSceneAssets.a2 : endSceneAssets.a1},
+    {id: "d", x: 250, y: 150, img: endSceneClicked.d ? endSceneAssets.d2 : endSceneAssets.d1},
+    {id: "n", x: 400, y: 120, img: endSceneClicked.n ? endSceneAssets.n2 : endSceneAssets.n1},
+    {id: "a", x: 550, y: 120, img: endSceneClicked.a ? endSceneAssets.a2 : endSceneAssets.a1},
   ];
-
-  assetsToShow.forEach(obj => { if(obj.img) image(obj.img, obj.x, obj.y, 100, 100); });
+  assetsToShow.forEach(obj => { if(obj.img) image(obj.img, obj.x, obj.y, 500, 500); });
 }
 
 function handleEndSceneClicks() {
-  let positions = {d:{x:150,y:400}, n:{x:400,y:400}, a:{x:650,y:400}};
+  let positions = {d:{x:150,y:120}, n:{x:450,y:120}, a:{x:750,y:120}};
   for(let key in positions) {
     let pos = positions[key];
-    if(dist(mouseX, mouseY, pos.x, pos.y) < 50) endSceneClicked[key] = !endSceneClicked[key];
+    if(dist(mouseX, mouseY, pos.x, pos.y) < 90) endSceneClicked[key] = !endSceneClicked[key];
   }
 }
