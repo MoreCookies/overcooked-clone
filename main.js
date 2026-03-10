@@ -30,6 +30,7 @@ console.log(remaining_dishes)
 function preload() {
   backgroundlol = loadImage("assets/backgroundlol.png");
   kitchenBG = loadImage("assets/kitchenfloor.png");
+  kitchenBG2 = loadImage("assets/kitchen.png");
   potatoImg = loadImage("assets/potatoking.png");
   titlepage = loadImage("assets/titlepage.png");
   characterImg1 = loadImage("assets/character_right1.png")
@@ -396,7 +397,7 @@ function drawIntroScene() {
 
 //Kitchen Scene
 function drawKitchenScene() {
-  image(kitchenBG, 0, 0, width, height);
+  image(kitchenBG2, 0, 0, width, height);
 
   fill(255);
   textAlign(CENTER, CENTER);
